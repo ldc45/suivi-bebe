@@ -13,6 +13,12 @@ export function useSession() {
   return session;
 }
 
-export const sendCode = (email: string) => supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
-export const verifyCode = (email: string, token: string) => supabase.auth.verifyOtp({ email, token, type: "email" });
+/**
+ * Connexion par e-mail et mot de passe.
+ * Prérequis Supabase : Authentication > Sign In / Providers > Email, option « Confirm email » désactivée,
+ * pour que la création du compte connecte immédiatement sans e-mail de confirmation.
+ * L’accès aux données reste limité aux adresses de la table household_members (règles RLS).
+ */
+export const signIn = (email: string, password: string) => supabase.auth.signInWithPassword({ email, password });
+export const signUp = (email: string, password: string) => supabase.auth.signUp({ email, password });
 export const signOut = () => supabase.auth.signOut();
