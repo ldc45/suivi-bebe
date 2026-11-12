@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["icons/icon-180.png"],
+      includeAssets: ["icons/icon-180.png", "icons/icon.svg"],
       manifest: {
         name: "Suivi bébé",
         short_name: "Suivi bébé",
@@ -19,8 +19,9 @@ export default defineConfig({
         background_color: "#1B1828",
         theme_color: "#1B1828",
         icons: [
-          { src: "/icons/icon-180.png", sizes: "180x180", type: "image/png" },
-          { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
+          { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+          { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+          { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
       },
       workbox: { navigateFallback: "/index.html" },

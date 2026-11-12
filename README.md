@@ -47,7 +47,7 @@ npm run dev                     # http://localhost:5173
 
 ### 2. Icônes
 
-Ajoutez `public/icons/icon-180.png` et `public/icons/icon-512.png` (fournies avec l’archive du projet). Elles servent d’icône sur l’écran d’accueil des téléphones.
+Les icônes de l’écran d’accueil sont dans `public/icons` : `icon.svg` est le modèle, `icon-180.png` (iPhone), `icon-192.png` et `icon-512.png` (Android) en sont tirées. Pour changer l’icône, modifiez le SVG puis régénérez les trois PNG aux mêmes dimensions.
 
 ### 3. Netlify
 
