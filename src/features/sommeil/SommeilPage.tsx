@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { useApp } from "@/app/AppContext";
+import { agree, subject } from "@/babies/types";
 import { interval } from "@/entries/describe";
 import { EntrySheet } from "@/entries/EntrySheet";
 import { LogList } from "@/entries/rows";
@@ -25,7 +26,7 @@ export function SommeilPage() {
 
   const action = isToday && running
     ? <button type="button" className="hbtn" onClick={() => sheet.open(<EntrySheet type="sleep" entry={running} />)}>Réveil</button>
-    : <button type="button" className="hbtn" onClick={() => sheet.open(<EntrySheet type="sleep" />)}>{isToday ? "Il s’endort" : "+ Sommeil"}</button>;
+    : <button type="button" className="hbtn" onClick={() => sheet.open(<EntrySheet type="sleep" />)}>{isToday ? `${subject(baby)} s’endort` : "+ Sommeil"}</button>;
 
   return (
     <>
@@ -33,12 +34,12 @@ export function SommeilPage() {
       <div className="hero" style={{ "--c": ENTRY_META.sleep.color } as CSSProperties}>
         <div className="hl">{isToday ? "Sommeil aujourd’hui" : `Sommeil, ${dayLabel(viewDay)}`}</div>
         <div className="hrow"><span className="num hbig">{dur(total)}</span>{action}</div>
-        <div className="hs">{isToday && running ? `Endormi à ${hm(running.startedAt)}, depuis ${dur(now - running.startedAt)}` : "Total sur la journée, de minuit à minuit"}</div>
+        <div className="hs">{isToday && running ? `${agree(baby, "Endormi")} à ${hm(running.startedAt)}, depuis ${dur(now - running.startedAt)}` : "Total sur la journée, de minuit à minuit"}</div>
       </div>
       <div className="mini2">
         <div className="mini">
           <span className="num">{isToday ? (running ? dur(now - running.startedAt) : lastEnd ? dur(now - (lastEnd.endedAt ?? lastEnd.startedAt)) : "–") : longest ? dur(longest) : "–"}</span>
-          <span>{isToday ? (running ? "de sommeil en cours" : "éveillé depuis") : "plus long sommeil"}</span>
+          <span>{isToday ? (running ? "de sommeil en cours" : agree(baby, "éveillé") + " depuis") : "plus long sommeil"}</span>
         </div>
         <div className="mini"><span className="num">{daySleeps.length}</span><span>{daySleeps.length > 1 ? "siestes et nuits" : "sieste ou nuit"}</span></div>
       </div>

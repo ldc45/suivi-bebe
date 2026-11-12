@@ -44,5 +44,10 @@ export interface Medication {
   active: boolean;
 }
 
+/** Accorde un mot au féminin pour une fille (masculin par défaut). */
+export const agree = (b: Pick<Baby, "sex"> | null | undefined, word: string) => (b?.sex === "f" ? `${word}e` : word);
+/** Sujet d’une phrase : « Elle », « Il », ou le prénom si le sexe n’est pas renseigné. */
+export const subject = (b: Pick<Baby, "sex" | "name"> | null | undefined) => (b?.sex === "f" ? "Elle" : b?.sex === "m" ? "Il" : b?.name || "Bébé");
+
 export const SEX_LABEL: Record<Sex, string> = { f: "Fille", m: "Garçon" };
 export const FREQ_LABEL: Record<Frequency, string> = { daily: "Tous les jours", weekly: "Une fois par semaine", as_needed: "Si besoin" };

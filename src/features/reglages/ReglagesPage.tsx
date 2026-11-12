@@ -137,7 +137,7 @@ function AccountSection() {
     <div className="panel small">
       <p style={{ marginTop: 0 }}>Connecté avec {email}.</p>
       {members.data && <p>Membres du foyer : {members.data.join(", ")}.</p>}
-      <p>Pour donner accès à quelqu’un, ajoutez son adresse dans Supabase, table <b>household_members</b>. Il se connectera ensuite avec un code reçu par e-mail.</p>
+      <p>Pour donner accès à quelqu’un, ajoutez son adresse dans Supabase, table <b>household_members</b>. Cette personne pourra ensuite se connecter avec son adresse e-mail et son mot de passe.</p>
       <button type="button" className="btn" onClick={() => signOut()}>Se déconnecter</button>
     </div>
   );

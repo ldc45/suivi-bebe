@@ -2,7 +2,7 @@
  * Règles métier : seuils selon l’âge, repères, alertes, statut des journées.
  * Fonctions pures, sans dépendance à React ni à Supabase (testées dans rules.test.ts).
  */
-import type { Baby } from "@/babies/types";
+import { agree, type Baby } from "@/babies/types";
 import { interval } from "@/entries/describe";
 import { ENTRY_ORDER, type Entry, type EntryOf, type EntryType, STOOL } from "@/entries/types";
 import { num } from "./format";
@@ -110,7 +110,7 @@ export function computeAlerts(b: Baby, entries: Entry[], now = Date.now()): Aler
       title: `Fièvre : ${num(v, 1)} °C ${ago(t.startedAt, now)}`,
       text: young
         ? "Avant 3 mois, toute fièvre demande un avis médical rapide. Appelez votre médecin, ou le 15 si vous ne pouvez pas le joindre."
-        : `Surveillez son comportement, son hydratation et ses couches. Consultez si la fièvre dure plus de 48 h, si ${name} est inhabituellement abattu ou en cas de doute.`,
+        : `Surveillez son comportement, son hydratation et ses couches. Consultez si la fièvre dure plus de 48 h, si ${name} est inhabituellement ${agree(b, "abattu")} ou en cas de doute.`,
     });
     else if (v < 36) out.push({ level: "attention", title: `Température basse : ${num(v, 1)} °C`, text: "Reprenez la température. Si elle reste basse, demandez un avis médical." });
   }
@@ -135,7 +135,7 @@ export function computeAlerts(b: Baby, entries: Entry[], now = Date.now()): Aler
     if (wet < exp) out.push({
       level: "attention",
       title: `${wet} couche${wet > 1 ? "s" : ""} mouillée${wet > 1 ? "s" : ""} sur 24 h`,
-      text: `Repère à cet âge : au moins ${exp}. Si ce n’est pas un oubli de saisie, un nombre faible peut signaler que ${name} ne boit pas assez. Parlez-en à votre médecin, surtout si les urines sont foncées ou s’il est moins réactif.`,
+      text: `Repère à cet âge : au moins ${exp}. Si ce n’est pas un oubli de saisie, un nombre faible peut signaler que ${name} ne boit pas assez. Parlez-en à votre médecin, surtout si les urines sont foncées ou ${b.sex === "f" ? "si elle est moins réactive" : "s’il est moins réactif"}.`,
     });
   }
 

@@ -24,6 +24,8 @@ export function LoginPage() {
     const { error } = signup ? await signUp(e, password) : await signIn(e, password);
     setBusy(false);
     if (error) {
+      // Erreur réseau (pas de réponse du serveur) : ne pas laisser croire à un mauvais mot de passe.
+      if (!error.status || /fetch|network/i.test(error.message)) return toast("Connexion impossible. Vérifiez le réseau, puis réessayez.");
       if (!signup) return toast("E-mail ou mot de passe incorrect. Première connexion ? Créez votre mot de passe.");
       return toast(/registered|exists/i.test(error.message) ? "Ce compte existe déjà : connectez-vous." : `Création impossible : ${error.message}`);
     }

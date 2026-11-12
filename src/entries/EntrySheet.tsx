@@ -1,6 +1,6 @@
 import { type CSSProperties, type ReactNode, useState } from "react";
 import { useApp } from "@/app/AppContext";
-import { FREQ_LABEL } from "@/babies/types";
+import { agree, FREQ_LABEL, subject } from "@/babies/types";
 import { num, parseNum } from "@/lib/format";
 import { visibleTypes, weights, lengths } from "@/lib/rules";
 import { dayKey, dur, fromInputs, hm, keyToDate, MIN, toDateInput, toTimeInput, todayKey } from "@/lib/time";
@@ -153,7 +153,7 @@ export function EntrySheet({ type, entry: given, initialTs }: Props) {
   const onSave = () => {
     const r = build();
     if (typeof r === "string") return toast(r);
-    persist(r, editing ? "Modification enregistrée" : `${meta.label} enregistré${["diaper", "temperature", "growth"].includes(type) ? "e" : ""}`, !editing);
+    persist(r, editing ? "Modification enregistrée" : `${meta.label} ${meta.feminine ? "enregistrée" : "enregistré"}`, !editing);
   };
   const onStart = () => {
     if (entries.some((x) => x.type === type && x.inProgress)) return toast(type === "sleep" ? "Un sommeil est déjà en cours." : "Une séance est déjà en cours.");
@@ -237,8 +237,8 @@ export function EntrySheet({ type, entry: given, initialTs }: Props) {
     }
     case "sleep":
       body = <>{!editing && <p className="muted" style={{ marginTop: 0 }}>Lancez le chrono quand {baby.name} s’endort, puis appuyez sur Réveil. Pour une sieste déjà terminée, indiquez les heures.</p>}
-        <Field label="Endormi le"><div className="row2"><input className="inp" type="date" max={todayKey()} value={startDate} onChange={(e) => setStartDate(e.target.value)} aria-label="Date d’endormissement" /><input className="inp" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} aria-label="Heure d’endormissement" /></div></Field>
-        <Field label="Réveillé le"><div className="row2"><input className="inp" type="date" max={todayKey()} value={endDate} onChange={(e) => setEndDate(e.target.value)} aria-label="Date de réveil" /><input className="inp" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} aria-label="Heure de réveil" /></div></Field>
+        <Field label={`${agree(baby, "Endormi")} le`}><div className="row2"><input className="inp" type="date" max={todayKey()} value={startDate} onChange={(e) => setStartDate(e.target.value)} aria-label="Date d’endormissement" /><input className="inp" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} aria-label="Heure d’endormissement" /></div></Field>
+        <Field label={`${agree(baby, "Réveillé")} le`}><div className="row2"><input className="inp" type="date" max={todayKey()} value={endDate} onChange={(e) => setEndDate(e.target.value)} aria-label="Date de réveil" /><input className="inp" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} aria-label="Heure de réveil" /></div></Field>
         {entry?.inProgress && <p className="small muted">Laissez le réveil vide si le sommeil continue.</p>}</>;
       break;
     case "solid": {
@@ -269,7 +269,7 @@ export function EntrySheet({ type, entry: given, initialTs }: Props) {
   let footer: ReactNode;
   if (!editing && (type === "sleep" || type === "tummy")) {
     footer = <><button className="btn wide" type="button" disabled={busy} onClick={onSave}>{type === "sleep" ? "Enregistrer la sieste" : "Enregistrer la séance"}</button>
-      <button className="btn primary wide" type="button" disabled={busy} onClick={onStart}>{type === "sleep" ? "Il s’endort" : "Démarrer"}</button></>;
+      <button className="btn primary wide" type="button" disabled={busy} onClick={onStart}>{type === "sleep" ? `${subject(baby)} s’endort` : "Démarrer"}</button></>;
   } else if (entry?.inProgress) {
     footer = <><button className="btn danger" type="button" onClick={onDelete}>Supprimer</button>
       <button className="btn wide" type="button" disabled={busy} onClick={onSave}>Enregistrer</button>

@@ -44,17 +44,17 @@ export const FEEDS: EntryType[] = ["bottle", "breastfeeding", "solid"];
 /** Types affichés sur l’anneau intérieur du cadran. */
 export const INNER_RING: EntryType[] = ["diaper", "medication", "temperature", "growth"];
 
-export const ENTRY_META: Record<EntryType, { label: string; short: string; color: string; timer?: boolean }> = {
+export const ENTRY_META: Record<EntryType, { label: string; short: string; color: string; timer?: boolean; feminine?: boolean }> = {
   bottle:        { label: "Biberon",          short: "Biberon",     color: "#5AAFD0" },
   breastfeeding: { label: "Allaitement",      short: "Tétée",       color: "#E0A23A" },
-  pumping:       { label: "Expression",       short: "Tire-lait",   color: "#BC8FD8" },
-  diaper:        { label: "Couche",           short: "Couche",      color: "#C27F45" },
+  pumping:       { label: "Expression",       short: "Tire-lait",   color: "#BC8FD8", feminine: true },
+  diaper:        { label: "Couche",           short: "Couche",      color: "#C27F45", feminine: true },
   medication:    { label: "Médicament",       short: "Médicament",  color: "#EA7670" },
   sleep:         { label: "Sommeil",          short: "Sommeil",     color: "#6F8DF0", timer: true },
   solid:         { label: "Repas solide",     short: "Solide",      color: "#8DC765" },
-  temperature:   { label: "Température",      short: "Température", color: "#F09072" },
+  temperature:   { label: "Température",      short: "Température", color: "#F09072", feminine: true },
   tummy:         { label: "Tummy time",       short: "Tummy time",  color: "#4CCBBE", timer: true },
-  growth:        { label: "Pesée et mesure",  short: "Pesée",       color: "#F29BC0" },
+  growth:        { label: "Pesée et mesure",  short: "Pesée",       color: "#F29BC0", feminine: true },
 };
 export const ENTRY_ORDER = Object.keys(ENTRY_META) as EntryType[];
 
