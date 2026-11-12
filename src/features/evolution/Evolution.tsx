@@ -155,9 +155,12 @@ export function Charts({ type, range }: { type: EntryType; range: number }) {
       </>;
     }
     case "solid": {
+      // Première fois : sur tout l’historique, pas seulement sur la période affichée.
+      const firstEver = new Map<string, number>();
+      for (const e of entries) if (e.type === "solid") { const k = e.data.food.toLowerCase(); firstEver.set(k, Math.min(firstEver.get(k) ?? Infinity, e.startedAt)); }
       const foods = new Map<string, { name: string; first: number; n: number; reactions: Set<string> }>();
       for (const e of [...(flat as EntryOf<"solid">[])].sort((a, b) => a.startedAt - b.startedAt)) {
-        const k = e.data.food.toLowerCase(), f = foods.get(k) ?? { name: e.data.food, first: e.startedAt, n: 0, reactions: new Set<string>() };
+        const k = e.data.food.toLowerCase(), f = foods.get(k) ?? { name: e.data.food, first: firstEver.get(k) ?? e.startedAt, n: 0, reactions: new Set<string>() };
         f.n++; if (e.data.reaction && e.data.reaction !== "none") f.reactions.add(REACTION_LABEL[e.data.reaction]); foods.set(k, f);
       }
       return <>

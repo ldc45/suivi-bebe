@@ -6,6 +6,8 @@ import type { Entry, EntryType } from "./types";
 /** Fenêtre chargée et partagée par tous les écrans. */
 export const WINDOW_DAYS = 180;
 const PAGE = 1000;
+/** Types chargés sans limite de date : ils sont peu nombreux et leur historique complet compte. */
+const ALL_TIME_TYPES: EntryType[] = ["growth", "solid"];
 
 interface EntryRow {
   id: string; baby_id: string; type: EntryType; started_at: string; ended_at: string | null; in_progress: boolean;
@@ -35,7 +37,8 @@ async function fetchEntries(babyId: string, since: number): Promise<Entry[]> {
     const { data, error } = await supabase
       .from("entries").select("*")
       .eq("baby_id", babyId)
-      .gte("started_at", new Date(since).toISOString())
+      // Pesées et repas solides : tout l’historique (courbe de croissance, première fois d’un aliment).
+      .or(`started_at.gte.${new Date(since).toISOString()},type.in.(${ALL_TIME_TYPES.join(",")})`)
       .order("started_at", { ascending: false })
       .range(from, from + PAGE - 1);
     if (error) throw error;
@@ -45,7 +48,10 @@ async function fetchEntries(babyId: string, since: number): Promise<Entry[]> {
   return out;
 }
 
-/** Saisies des WINDOW_DAYS derniers jours, triées de la plus récente à la plus ancienne. */
+/**
+ * Saisies des WINDOW_DAYS derniers jours (plus l’historique complet des pesées et des repas solides),
+ * triées de la plus récente à la plus ancienne.
+ */
 export function useEntries(babyId: string | undefined) {
   return useQuery({
     queryKey: entriesKey(babyId),
