@@ -1,4 +1,4 @@
-import { createContext, type CSSProperties, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, type CSSProperties, type ReactNode, type TouchEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 /* ---------- Feuille du bas ---------- */
 interface SheetApi { open: (node: ReactNode) => void; close: () => void }
@@ -14,11 +14,56 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
   const [node, setNode] = useState<ReactNode>(null);
   const [toast, setToast] = useState<{ msg: string; undo?: () => void; id: number } | null>(null);
   const timer = useRef<number>();
+  // Une entrée d’historique par feuille ouverte : le geste « retour » du téléphone ferme la feuille
+  // au lieu de quitter la page.
+  const pushed = useRef(false);
+  const skipPop = useRef(false);
 
-  const close = useCallback(() => setNode(null), []);
-  const sheet = useMemo<SheetApi>(() => ({ open: (n) => setNode(n), close }), [close]);
+  const close = useCallback(() => {
+    setNode(null);
+    if (pushed.current) { pushed.current = false; skipPop.current = true; history.back(); }
+  }, []);
+  const open = useCallback((n: ReactNode) => {
+    if (!pushed.current) { history.pushState({ ...history.state, sheet: true }, ""); pushed.current = true; }
+    setNode(n);
+  }, []);
+  const sheet = useMemo<SheetApi>(() => ({ open, close }), [open, close]);
+
+  useEffect(() => {
+    const onPop = () => {
+      if (skipPop.current) { skipPop.current = false; return; }
+      if (pushed.current) { pushed.current = false; setNode(null); }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  // Glisser la feuille vers le bas (depuis la poignée ou l’en-tête) pour la fermer.
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ y0: number; dy: number } | null>(null);
+  const onTouchStart = (e: TouchEvent) => {
+    if (!(e.target as HTMLElement).closest(".grab, .shead")) return;
+    drag.current = { y0: e.touches[0].clientY, dy: 0 };
+  };
+  const onTouchMove = (e: TouchEvent) => {
+    const d = drag.current, el = sheetRef.current;
+    if (!d || !el) return;
+    d.dy = Math.max(0, e.touches[0].clientY - d.y0);
+    el.style.transition = "none";
+    el.style.transform = `translateY(${d.dy}px)`;
+  };
+  const onTouchEnd = () => {
+    const d = drag.current, el = sheetRef.current;
+    drag.current = null;
+    if (!d || !el) return;
+    el.style.transition = "";
+    el.style.transform = "";
+    if (d.dy > 90) close();
+  };
   const showToast = useCallback<ToastFn>((msg, undo) => {
     window.clearTimeout(timer.current);
+    // Petite vibration de confirmation (Android ; ignorée là où ce n’est pas pris en charge).
+    try { navigator.vibrate?.(undo ? 12 : 0); } catch { /* indisponible */ }
     setToast({ msg, undo, id: Date.now() });
     timer.current = window.setTimeout(() => setToast(null), undo ? 5000 : 2600);
   }, []);
@@ -38,7 +83,7 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
         {node && (
           <>
             <div className="sheet-bg" onClick={close} />
-            <div className="sheet" role="dialog" aria-modal="true">
+            <div className="sheet" role="dialog" aria-modal="true" ref={sheetRef} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} onTouchCancel={onTouchEnd}>
               <div className="grab" />
               {node}
             </div>

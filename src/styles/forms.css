@@ -1,10 +1,12 @@
 /* Formulaires : feuille de saisie, contrôles, boutons. */
 
 .sheet-bg{ position:fixed; inset:0; background:rgba(10,8,18,.5); z-index:20; }
-.sheet{ position:fixed; left:0; right:0; bottom:0; z-index:21; display:flex; flex-direction:column; max-height:94vh; background:var(--surface); border-radius:24px 24px 0 0; }
+.sheet{ position:fixed; left:0; right:0; bottom:0; z-index:21; display:flex; flex-direction:column; max-height:94vh; background:var(--surface); border-radius:24px 24px 0 0; transition:transform .2s ease; }
 .sheet .body{ flex:1; overflow:auto; padding:10px 20px 8px; max-width:520px; width:100%; margin:0 auto; }
 .sheet .foot{ padding:10px 20px calc(14px + env(safe-area-inset-bottom,0px)); max-width:520px; width:100%; margin:0 auto; display:flex; gap:10px; }
-.grab{ width:40px; height:5px; border-radius:3px; background:var(--line); margin:10px auto 2px; flex:none; }
+.grab{ width:40px; height:5px; border-radius:3px; background:var(--line); margin:10px auto 2px; flex:none; position:relative; }
+.grab::before{ content:""; position:absolute; inset:-12px -40px; }
+.sheet .shead{ touch-action:none; }
 .shead{ display:flex; align-items:center; justify-content:space-between; margin:6px 0 18px; }
 .shead h2{ margin:0; font-family:var(--serif); font-variation-settings:"SOFT" 100; font-weight:600; font-size:1.45rem; display:flex; align-items:center; gap:10px; }
 .shead h2 .ico{ width:26px; height:26px; }
