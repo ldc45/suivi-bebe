@@ -18,18 +18,21 @@ export function Chips<T extends string>({ options, value, onChange, className, n
 }
 
 /** Valeur numérique avec boutons − et +. */
-export function Stepper({ value, onChange, step, decimals = 0, unit, min = 0, compact }: {
+export function Stepper({ value, onChange, step, decimals = 0, unit, min = 0, compact, fallback, placeholder }: {
   value: string; onChange: (v: string) => void; step: number; decimals?: number; unit?: string; min?: number; compact?: boolean;
+  /** Valeur de départ des boutons − et + quand le champ est vide (ex. dernière pesée). */
+  fallback?: number; placeholder?: string;
 }) {
   const bump = (d: number) => {
-    const v = Math.max(min, Math.round((parseNum(value) + d) * 10 ** decimals) / 10 ** decimals);
+    const start = value.trim() === "" && fallback != null ? fallback : parseNum(value);
+    const v = Math.max(min, Math.round((start + d) * 10 ** decimals) / 10 ** decimals);
     onChange(decimals ? v.toFixed(decimals) : String(v));
   };
   return (
     <>
       <div className={`stepper${compact ? " compact" : ""}`}>
         <button type="button" onClick={() => bump(-step)} aria-label={`Moins ${step}`}>−{decimals ? "" : step}</button>
-        <input type="number" inputMode="decimal" step={step} min={min} value={value} onChange={(e) => onChange(e.target.value)} aria-label={unit} />
+        <input type="number" inputMode="decimal" step={step} min={min} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} aria-label={unit} />
         <button type="button" onClick={() => bump(step)} aria-label={`Plus ${step}`}>+{decimals ? "" : step}</button>
       </div>
       {unit && <div className="unit">{unit}</div>}

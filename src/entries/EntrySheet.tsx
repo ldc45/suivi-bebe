@@ -75,7 +75,9 @@ export function EntrySheet({ type, entry, initialTs }: Props) {
   const [reaction, setReaction] = useState<Reaction>((d.reaction as Reaction) ?? "none");
   const [celsius, setCelsius] = useState(String(d.celsius ?? "37.0"));
   const [method, setMethod] = useState<TempMethod>((d.method as TempMethod) ?? "rectal");
-  const [kg, setKg] = useState(d.weight_g ? (Number(d.weight_g) / 1000).toFixed(2) : w.length ? w[w.length - 1].value.toFixed(2) : "");
+  // Jamais prérempli avec la dernière pesée : noter seulement une taille ne doit pas recopier l’ancien poids.
+  const [kg, setKg] = useState(d.weight_g ? (Number(d.weight_g) / 1000).toFixed(2) : "");
+  const lastKg = w.length ? w[w.length - 1].value : undefined;
   const [cm, setCm] = useState(d.length_mm ? String(Number(d.length_mm) / 10) : "");
   const [place, setPlace] = useState<Place>((d.place as Place) ?? "home");
   const [note, setNote] = useState(entry?.note ?? "");
@@ -249,7 +251,8 @@ export function EntrySheet({ type, entry, initialTs }: Props) {
         {timeBlock("Début")}<div className="grp"><Stepper value={duration} onChange={setDuration} step={1} unit="minutes" min={1} /></div></>;
       break;
     case "growth":
-      body = <>{timeBlock("Date de la mesure")}<div className="grp"><Stepper value={kg} onChange={setKg} step={0.01} decimals={2} unit="kilogrammes" /></div>
+      body = <>{timeBlock("Date de la mesure")}<div className="grp"><Stepper value={kg} onChange={setKg} step={0.01} decimals={2} unit="kilogrammes" fallback={lastKg}
+          placeholder={lastKg ? `Dernier : ${num(lastKg, 2)}` : "Poids"} /></div>
         {baby.settings.show_length !== false && <Field label="Taille (cm)" htmlFor="cm"><input id="cm" className="inp" type="number" inputMode="decimal" step="0.1" value={cm} onChange={(e) => setCm(e.target.value)} placeholder={ls.length ? `Dernière : ${num(ls[ls.length - 1].value, 1)} cm` : "Facultatif"} /></Field>}
         <Field label="Où"><Chips name="place" options={PLACE_LABEL} value={place} onChange={setPlace} /></Field></>;
       break;
