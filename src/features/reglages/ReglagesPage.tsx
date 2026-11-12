@@ -6,6 +6,7 @@ import { useBabyForm } from "@/babies/BabyForm";
 import { FREQ_LABEL, type Frequency, type Thresholds } from "@/babies/types";
 import { ENTRY_META, ENTRY_ORDER, type EntryType } from "@/entries/types";
 import { signOut } from "@/lib/auth";
+import { NIGHT_FROM, NIGHT_TO, setAutoNight, setTheme, type Theme, toggleNight, useDisplay } from "@/lib/display";
 import { parseNum } from "@/lib/format";
 import { autoGap, thresholds } from "@/lib/rules";
 import { supabase } from "@/lib/supabase";
@@ -123,6 +124,27 @@ function ThresholdsSection() {
   );
 }
 
+const THEME_LABEL: Record<Theme, string> = { auto: "Comme le téléphone", light: "Clair", dark: "Sombre" };
+
+/** Préférences d’affichage de ce téléphone (pas partagées avec l’autre parent). */
+function DisplaySection() {
+  const { prefs, night } = useDisplay();
+  return (
+    <div className="panel">
+      <Field label="Thème"><Chips name="theme" options={THEME_LABEL} value={prefs.theme} onChange={setTheme} /></Field>
+      <div className="set-item">
+        <span>Mode nuit<br /><span className="small muted">Lumière ambrée très faible, pour ne pas vous éblouir pendant les tétées de nuit.</span></span>
+        <Toggle checked={night} label="Mode nuit" onChange={() => toggleNight()} />
+      </div>
+      <div className="set-item">
+        <span>Mode nuit automatique<br /><span className="small muted">De {NIGHT_FROM} h à {NIGHT_TO} h.</span></span>
+        <Toggle checked={prefs.autoNight} label="Mode nuit automatique" onChange={setAutoNight} />
+      </div>
+      <p className="small muted" style={{ marginBottom: 0 }}>Le bouton lune, en haut de l’écran, allume ou éteint le mode nuit jusqu’au matin. Ces réglages ne concernent que ce téléphone.</p>
+    </div>
+  );
+}
+
 function AccountSection() {
   const { email, householdId } = useApp();
   const members = useQuery({
@@ -156,6 +178,7 @@ export function ReglagesPage() {
         <h2 className="sec">Types d’activité affichés</h2><TypesSection />
         <h2 className="sec">Repères des alertes</h2><ThresholdsSection />
       </div>
+      <h2 className="sec">Affichage</h2><DisplaySection />
       <h2 className="sec">Compte et partage</h2><AccountSection />
     </>
   );

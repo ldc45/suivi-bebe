@@ -10,6 +10,7 @@ export const ICONS = {
   temperature: '<path d="M14 14.5V5a2 2 0 0 0-4 0v9.5a4 4 0 1 0 4 0z"/><path d="M12 9v7.5"/>',
   tummy: '<circle cx="16.5" cy="9" r="2.5"/><path d="M3 19h18"/><path d="M5 19c1-3.2 4-5.2 8-5.2h3.2a3 3 0 0 1 3 3V19"/>',
   growth: '<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.3 10.2a5 5 0 0 1 7.4 0"/><path d="M12 10.8l1.6-2.1"/>',
+  night: '<path d="M19 14.5A7.5 7.5 0 1 1 9.5 5a6 6 0 0 0 9.5 9.5z"/>',
   clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
   book: '<path d="M12 6.5C10.5 5 8 4.5 4 4.5v14c4 0 6.5.5 8 2 1.5-1.5 4-2 8-2v-14c-4 0-6.5.5-8 2z"/><path d="M12 6.5v14"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',

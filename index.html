@@ -12,6 +12,14 @@
     <link rel="apple-touch-icon" href="/icons/icon-180.png" />
     <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
     <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+    <script>
+      // Thème et mode nuit appliqués avant le premier affichage (même calcul que src/lib/display.ts).
+      try {
+        var p = JSON.parse(localStorage.getItem("suivi-bebe:display") || "{}"), now = Date.now(), h = new Date().getHours();
+        if (p.theme === "light" || p.theme === "dark") document.documentElement.dataset.theme = p.theme;
+        if ((p.nightUntil && now < p.nightUntil) || (p.autoNight && (h >= 21 || h < 7) && !(p.offUntil && now < p.offUntil))) document.documentElement.dataset.night = "";
+      } catch (e) {}
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400;9..144,600,100&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet" />

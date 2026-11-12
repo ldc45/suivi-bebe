@@ -2,12 +2,12 @@
 
 .kpis{ display:flex; flex-wrap:wrap; gap:6px 26px; margin:4px 0 18px; }
 .kpi b{ display:block; font-family:var(--serif); font-variation-settings:"SOFT" 100; font-weight:400; font-size:1.55rem; line-height:1.15; }
-.kpi span{ font-size:.8rem; color:var(--muted); }
+.kpi span{ font-size:.88rem; color:var(--muted); }
 .chart{ margin-bottom:26px; }
-.chart h4{ margin:0 0 10px; font-weight:600; font-size:.95rem; }
+.chart h4{ margin:0 0 10px; font-weight:600; font-size:1rem; }
 .cbox{ position:relative; height:220px; }
 .scroll{ overflow-x:auto; }
-table.grid{ border-collapse:collapse; font-size:.84rem; width:100%; }
+table.grid{ border-collapse:collapse; font-size:.9rem; width:100%; }
 table.grid th, table.grid td{ padding:7px 5px; text-align:center; border-bottom:1px solid var(--line); white-space:nowrap; font-weight:500; }
 table.grid th{ color:var(--muted); }
 table.grid th:first-child, table.grid td:first-child{ text-align:left; position:sticky; left:0; background:var(--bg); }
@@ -16,19 +16,19 @@ table.grid th:first-child, table.grid td:first-child{ text-align:left; position:
 /* Couleur des selles par jour */
 .frise .r{ display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid var(--line); }
 .frise .r:last-child{ border-bottom:0; }
-.frise .dl{ width:78px; flex:none; font-size:.84rem; color:var(--muted); }
+.frise .dl{ width:86px; flex:none; font-size:.88rem; color:var(--muted); }
 .frise .ds{ display:flex; flex-wrap:wrap; gap:5px; }
 .frise .ds i{ width:18px; height:18px; border-radius:50%; background:var(--sc); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--text) 22%, transparent); }
 
 /* Légendes */
-.legend{ display:flex; flex-wrap:wrap; gap:6px 14px; font-size:.8rem; color:var(--muted); margin-top:12px; }
+.legend{ display:flex; flex-wrap:wrap; gap:6px 14px; font-size:.88rem; color:var(--muted); margin-top:12px; }
 .legend span{ display:inline-flex; align-items:center; gap:6px; }
 .legend i{ width:10px; height:10px; border-radius:50%; background:var(--c); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--text) 20%, transparent); }
 
 /* Frise sur 24 heures */
-.tl{ font-size:.8rem; }
+.tl{ font-size:.84rem; }
 .tl-r{ display:flex; align-items:center; gap:8px; height:26px; }
-.tl-d{ width:78px; flex:none; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tl-d{ width:84px; flex:none; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .tl-t{ position:relative; flex:1; height:16px; border-radius:8px; background:repeating-linear-gradient(90deg, var(--surface) 0 calc(25% - 1px), var(--line) calc(25% - 1px) 25%); }
 .tl-t i{ position:absolute; top:2px; bottom:2px; min-width:3px; border-radius:6px; background:var(--c); }
 .tl-t i.pt{ top:0; bottom:0; min-width:4px; border-radius:2px; }
@@ -37,20 +37,20 @@ table.grid th:first-child, table.grid td:first-child{ text-align:left; position:
 .tl-ax b:first-child{ transform:none; } .tl-ax b:last-child{ transform:translateX(-100%); }
 
 /* Journal par semaine */
-.jlegend{ display:flex; flex-wrap:wrap; gap:6px 14px; font-size:.8rem; margin:4px 0 10px; }
+.jlegend{ display:flex; flex-wrap:wrap; gap:6px 14px; font-size:.88rem; margin:4px 0 10px; }
 .jlegend span{ display:inline-flex; align-items:center; gap:6px; }
 .jlegend i{ width:9px; height:9px; border-radius:50%; }
 i.ok{ background:#8DC765; } i.check{ background:var(--warn); } i.alert{ background:var(--urgent); }
 .week{ background:var(--surface); border-radius:18px; padding:14px; margin-bottom:12px; }
 .wh{ display:flex; justify-content:space-between; align-items:flex-end; gap:10px; margin-bottom:10px; }
 .wh b{ font-family:var(--serif); font-variation-settings:"SOFT" 100; font-weight:600; font-size:1.15rem; display:block; }
-.wh span{ font-size:.8rem; color:var(--muted); }
+.wh span{ font-size:.88rem; color:var(--muted); }
 .wr{ text-align:right; } .wr b{ color:var(--moon); font-size:1.1rem; } .wr span{ display:block; }
 .wdays{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
-.wd{ border:0; background:var(--raised); border-radius:12px; padding:7px 0 6px; display:flex; flex-direction:column; align-items:center; gap:1px; min-width:0; }
+.wd{ border:0; background:var(--raised); border-radius:12px; padding:9px 0 7px; display:flex; flex-direction:column; align-items:center; gap:1px; min-width:0; }
 .wd b{ font-size:1rem; font-weight:600; }
-.wdl{ font-size:.68rem; color:var(--muted); }
-.wdv{ font-size:.68rem; color:var(--muted); white-space:nowrap; }
+.wdl{ font-size:.75rem; color:var(--muted); }
+.wdv{ font-size:.75rem; color:var(--muted); white-space:nowrap; }
 .wd i{ width:6px; height:6px; border-radius:50%; margin-top:2px; }
 .wd.ok i{ background:#8DC765; } .wd.check i{ background:var(--warn); } .wd.alert i{ background:var(--urgent); }
 .wd.ok{ background:color-mix(in srgb, #8DC765 12%, var(--raised)); }

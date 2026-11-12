@@ -4,6 +4,7 @@ import { avatarColor, BabySwitcher, initial } from "@/babies/BabySheet";
 import { PlusSheet } from "@/entries/PlusSheet";
 import { type EntryType, FEEDS } from "@/entries/types";
 import { AccueilPage } from "@/features/accueil/AccueilPage";
+import { toggleNight, useDisplay } from "@/lib/display";
 import { visibleTypes } from "@/lib/rules";
 import { ageLabel } from "@/lib/time";
 import { Icon } from "@/ui/Icon";
@@ -40,6 +41,7 @@ export function Shell() {
   const vis = visibleTypes(baby);
   const nav = NAV.filter((n) => !n.types || n.types.some((t) => vis.includes(t)));
   const half = Math.ceil(nav.length / 2);
+  const { night } = useDisplay();
   const navItem = (n: (typeof NAV)[number]) => (
     <NavLink key={n.to} to={n.to} end={n.to === "/"} onClick={() => window.scrollTo(0, 0)}><Icon name={n.icon} />{n.label}</NavLink>
   );
@@ -54,6 +56,7 @@ export function Shell() {
             <Icon name="chevron" className="rot" />
           </button>
           <div className="topr">
+            <button type="button" className={`gear${night ? " on" : ""}`} aria-label="Mode nuit" aria-pressed={night} onClick={() => toggleNight()}><Icon name="night" /></button>
             <button type="button" className={`gear${pathname === "/journal" ? " on" : ""}`} aria-label="Journal" onClick={() => navigate("/journal")}><Icon name="book" /></button>
             <button type="button" className={`gear${pathname === "/reglages" ? " on" : ""}`} aria-label="Réglages" onClick={() => navigate("/reglages")}><Icon name="sliders" /></button>
           </div>
@@ -76,10 +79,11 @@ export function Shell() {
         </main>
       </div>
       <nav className="tabs">
-        <div className="in" style={{ gridTemplateColumns: `repeat(${nav.length + 1}, 1fr)` }}>
-          {nav.slice(0, half).map(navItem)}
+        {/* Colonnes proportionnelles au nombre d’onglets de chaque côté : tous les onglets ont la même largeur. */}
+        <div className="in" style={{ gridTemplateColumns: `${half}fr 64px ${nav.length - half}fr` }}>
+          <div className="half">{nav.slice(0, half).map(navItem)}</div>
           <button type="button" className="plusbtn" aria-label="Ajouter une saisie" onClick={() => sheet.open(<PlusSheet />)}><span><Icon name="plus" /></span></button>
-          {nav.slice(half).map(navItem)}
+          <div className="half">{nav.slice(half).map(navItem)}</div>
         </div>
       </nav>
     </>

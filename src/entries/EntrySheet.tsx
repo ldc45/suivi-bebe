@@ -1,6 +1,7 @@
 import { type CSSProperties, type ReactNode, useState } from "react";
 import { useApp } from "@/app/AppContext";
 import { agree, FREQ_LABEL, subject } from "@/babies/types";
+import { useDisplay } from "@/lib/display";
 import { num, parseNum } from "@/lib/format";
 import { visibleTypes, weights, lengths } from "@/lib/rules";
 import { dayKey, dur, fromInputs, hm, keyToDate, MIN, toDateInput, toTimeInput, todayKey } from "@/lib/time";
@@ -17,6 +18,7 @@ type Kind = "pee" | "poo" | "both";
 const KIND_LABEL: Record<Kind, string> = { pee: "Pipi", poo: "Caca", both: "Les deux" };
 const SIDE_LABEL: Record<Side, string> = { left: "Gauche", right: "Droite" };
 const FEED_LABEL: Partial<Record<EntryType, string>> = { bottle: "Biberon", breastfeeding: "Tétée", solid: "Solide" };
+const STOOL_NAMES = Object.fromEntries(Object.entries(STOOL).map(([k, v]) => [k, v.label])) as Record<StoolColor, string>;
 const OFFSETS: [number, string][] = [[0, "Maintenant"], [5, "−5 min"], [15, "−15 min"], [30, "−30 min"]];
 
 interface Props { type: EntryType; entry?: Entry; initialTs?: number }
@@ -32,6 +34,7 @@ export function EntrySheet({ type, entry: given, initialTs }: Props) {
   const toast = useToast();
   const { save, remove } = useEntryMutations(baby?.id);
   const meta = ENTRY_META[type];
+  const { night } = useDisplay();
   const editing = !!entry;
 
   const defaultTs = (() => {
@@ -218,9 +221,13 @@ export function EntrySheet({ type, entry: given, initialTs }: Props) {
       body = <>{timeBlock("Date et heure")}<div className="grp"><Chips name="kind" className="big3" options={KIND_LABEL} value={kind} onChange={setKind} /></div>
         {stool && <>
           <div className="grp"><span className="lab">Couleur</span>
-            <div className="swatches">{(Object.keys(STOOL) as StoolColor[]).map((c) => (
-              <label className="sw" key={c}><input type="radio" name="color" checked={color === c} onChange={() => setColor(c)} aria-label={STOOL[c].label} /><span style={{ "--sc": STOOL[c].hex } as CSSProperties} /></label>))}</div>
-            <div className={`swname${sw?.alert ? " alert" : ""}`}>{sw ? `${sw.label}${sw.alert ? " : à signaler au médecin" : ""}` : "Touchez la couleur la plus proche"}</div></div>
+            {night
+              // Le filtre ambré du mode nuit fausse les couleurs : on choisit d’après le nom.
+              ? <><Chips name="color" options={STOOL_NAMES} value={color} onChange={setColor} />
+                <p className="small muted">Mode nuit : les couleurs à l’écran ne sont pas fidèles. Comparez à la lumière normale en cas de doute.</p></>
+              : <div className="swatches">{(Object.keys(STOOL) as StoolColor[]).map((c) => (
+                <label className="sw" key={c}><input type="radio" name="color" checked={color === c} onChange={() => setColor(c)} aria-label={STOOL[c].label} /><span style={{ "--sc": STOOL[c].hex } as CSSProperties} /></label>))}</div>}
+            <div className={`swname${sw?.alert ? " alert" : ""}`}>{sw ? `${sw.label}${sw.alert ? " : à signaler au médecin" : ""}` : night ? "Choisissez la couleur la plus proche" : "Touchez la couleur la plus proche"}</div></div>
           <Field label="Texture"><Chips name="texture" options={TEXTURE_LABEL} value={texture} onChange={setTexture} /></Field>
           <Field label="Quantité"><Chips name="amount" options={AMOUNT_LABEL} value={amount} onChange={setAmount} /></Field></>}</>;
       break;
