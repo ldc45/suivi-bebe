@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { describe, interval } from "@/entries/describe";
+import { lookBackground, lookOf, PEE_COLOR, POO_COLOR } from "@/entries/look";
 import { ENTRY_META, type Entry, type EntryType } from "@/entries/types";
 import { dayLabel, dayRange, H, hm, MIN, overlap } from "@/lib/time";
 
@@ -22,7 +23,7 @@ export function Timeline({ days, entries, types, now }: { days: string[]; entrie
                 if (!overlap(a, b, d0, d1)) return null;
                 const x1 = Math.max(a, d0) - d0, x2 = Math.min(b, d1) - d0;
                 return <i key={e.id} className={point ? "pt" : "bd"} title={`${ENTRY_META[e.type].label} ${hm(e.startedAt)} : ${describe(e, now)}`}
-                  style={{ left: pct(x1), width: pct(x2 - x1), "--c": ENTRY_META[e.type].color } as CSSProperties} />;
+                  style={{ left: pct(x1), width: pct(x2 - x1), "--c": lookOf(e).color, background: lookBackground(lookOf(e)) } as CSSProperties} />;
               })}
             </span>
           </div>
@@ -34,5 +35,7 @@ export function Timeline({ days, entries, types, now }: { days: string[]; entrie
 }
 
 export function Legend({ types }: { types: EntryType[] }) {
-  return <div className="legend">{types.map((t) => <span key={t}><i style={{ "--c": ENTRY_META[t].color } as CSSProperties} />{ENTRY_META[t].label}</span>)}</div>;
+  // Les couches sont détaillées : pipi et caca ont chacun leur couleur.
+  const items = types.flatMap((t): [string, string][] => (t === "diaper" ? [["Pipi", PEE_COLOR], ["Caca", POO_COLOR]] : [[ENTRY_META[t].label, ENTRY_META[t].color]]));
+  return <div className="legend">{items.map(([l, c]) => <span key={l}><i style={{ "--c": c } as CSSProperties} />{l}</span>)}</div>;
 }
