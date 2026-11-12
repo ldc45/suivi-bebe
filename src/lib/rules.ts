@@ -70,10 +70,26 @@ export function expectedWet(b: Baby, at = Date.now()): number {
   return age != null && age < 5 ? Math.max(1, age + 1) : thresholds(b).wetMin;
 }
 
-export const entriesOfDay = (entries: Entry[], k: string) => {
-  const [s, e] = dayRange(k);
-  return entries.filter((x) => x.startedAt >= s && x.startedAt < e);
-};
+/**
+ * Index des saisies par jour, calculé une seule fois par liste : le journal et les graphiques
+ * demandent des centaines de jours, et refiltrer toute la liste à chaque fois ralentissait les téléphones.
+ */
+const dayIndex = new WeakMap<Entry[], Map<string, Entry[]>>();
+const EMPTY: Entry[] = [];
+
+/** Saisies commencées le jour k, dans l’ordre de la liste (ne pas modifier le tableau renvoyé). */
+export function entriesOfDay(entries: Entry[], k: string): Entry[] {
+  let idx = dayIndex.get(entries);
+  if (!idx) {
+    idx = new Map();
+    for (const x of entries) {
+      const d = dayKey(x.startedAt), list = idx.get(d);
+      if (list) list.push(x); else idx.set(d, [x]);
+    }
+    dayIndex.set(entries, idx);
+  }
+  return idx.get(k) ?? EMPTY;
+}
 export const sumBottles = (list: Entry[]) => list.reduce((a, e) => a + (e.type === "bottle" ? e.data.ml : 0), 0);
 
 /** Temps d’une activité à durée (sommeil, tummy time) dans une plage. */

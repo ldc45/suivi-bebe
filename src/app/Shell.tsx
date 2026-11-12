@@ -1,16 +1,9 @@
-import type { CSSProperties } from "react";
+import { type CSSProperties, lazy, Suspense } from "react";
 import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { avatarColor, BabySwitcher, initial } from "@/babies/BabySheet";
 import { PlusSheet } from "@/entries/PlusSheet";
 import { type EntryType, FEEDS } from "@/entries/types";
 import { AccueilPage } from "@/features/accueil/AccueilPage";
-import { CouchesPage } from "@/features/couches/CouchesPage";
-import { JournalPage } from "@/features/journal/JournalPage";
-import { MesuresPage } from "@/features/mesures/MesuresPage";
-import { ReglagesPage } from "@/features/reglages/ReglagesPage";
-import { RepasPage } from "@/features/repas/RepasPage";
-import { SommeilPage } from "@/features/sommeil/SommeilPage";
-import { TummyPage } from "@/features/tummy/TummyPage";
 import { visibleTypes } from "@/lib/rules";
 import { ageLabel } from "@/lib/time";
 import { Icon } from "@/ui/Icon";
@@ -18,6 +11,15 @@ import type { IconName } from "@/ui/icons";
 import { useSheet } from "@/ui/Overlay";
 import { SyncStatus } from "@/ui/SyncStatus";
 import { useApp } from "./AppContext";
+
+// Écrans chargés à la demande : l’accueil s’affiche sans attendre la bibliothèque de graphiques.
+const RepasPage = lazy(() => import("@/features/repas/RepasPage").then((m) => ({ default: m.RepasPage })));
+const SommeilPage = lazy(() => import("@/features/sommeil/SommeilPage").then((m) => ({ default: m.SommeilPage })));
+const CouchesPage = lazy(() => import("@/features/couches/CouchesPage").then((m) => ({ default: m.CouchesPage })));
+const MesuresPage = lazy(() => import("@/features/mesures/MesuresPage").then((m) => ({ default: m.MesuresPage })));
+const TummyPage = lazy(() => import("@/features/tummy/TummyPage").then((m) => ({ default: m.TummyPage })));
+const JournalPage = lazy(() => import("@/features/journal/JournalPage").then((m) => ({ default: m.JournalPage })));
+const ReglagesPage = lazy(() => import("@/features/reglages/ReglagesPage").then((m) => ({ default: m.ReglagesPage })));
 
 /** Onglets du bas ; `types` : l’onglet n’apparaît que si l’un de ces types est affiché (Réglages). */
 const NAV: { to: string; label: string; icon: IconName; types?: EntryType[] }[] = [
@@ -58,6 +60,7 @@ export function Shell() {
         </header>
         <SyncStatus />
         <main>
+          <Suspense fallback={<p className="center muted">Chargement…</p>}>
           <Routes>
             <Route path="/" element={<AccueilPage />} />
             <Route path="/repas" element={<RepasPage />} />
@@ -69,6 +72,7 @@ export function Shell() {
             <Route path="/reglages" element={<ReglagesPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </Suspense>
         </main>
       </div>
       <nav className="tabs">
