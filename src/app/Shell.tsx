@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { avatarColor, BabySwitcher, initial } from "@/babies/BabySheet";
 import { PlusSheet } from "@/entries/PlusSheet";
+import { type EntryType, FEEDS } from "@/entries/types";
 import { AccueilPage } from "@/features/accueil/AccueilPage";
 import { CouchesPage } from "@/features/couches/CouchesPage";
 import { JournalPage } from "@/features/journal/JournalPage";
@@ -10,19 +11,21 @@ import { ReglagesPage } from "@/features/reglages/ReglagesPage";
 import { RepasPage } from "@/features/repas/RepasPage";
 import { SommeilPage } from "@/features/sommeil/SommeilPage";
 import { TummyPage } from "@/features/tummy/TummyPage";
+import { visibleTypes } from "@/lib/rules";
 import { ageLabel } from "@/lib/time";
 import { Icon } from "@/ui/Icon";
 import type { IconName } from "@/ui/icons";
 import { useSheet } from "@/ui/Overlay";
 import { useApp } from "./AppContext";
 
-const NAV: { to: string; label: string; icon: IconName }[] = [
+/** Onglets du bas ; `types` : l’onglet n’apparaît que si l’un de ces types est affiché (Réglages). */
+const NAV: { to: string; label: string; icon: IconName; types?: EntryType[] }[] = [
   { to: "/", label: "Accueil", icon: "clock" },
-  { to: "/repas", label: "Repas", icon: "bottle" },
-  { to: "/sommeil", label: "Sommeil", icon: "sleep" },
-  { to: "/couches", label: "Couches", icon: "diaper" },
-  { to: "/mesures", label: "Mesures", icon: "growth" },
-  { to: "/tummy", label: "Tummy", icon: "tummy" },
+  { to: "/repas", label: "Repas", icon: "bottle", types: [...FEEDS, "pumping"] },
+  { to: "/sommeil", label: "Sommeil", icon: "sleep", types: ["sleep"] },
+  { to: "/couches", label: "Couches", icon: "diaper", types: ["diaper"] },
+  { to: "/mesures", label: "Mesures", icon: "growth", types: ["growth", "temperature"] },
+  { to: "/tummy", label: "Tummy", icon: "tummy", types: ["tummy"] },
 ];
 
 export function Shell() {
@@ -31,6 +34,9 @@ export function Shell() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const idx = babies.findIndex((b) => b.id === baby?.id);
+  const vis = visibleTypes(baby);
+  const nav = NAV.filter((n) => !n.types || n.types.some((t) => vis.includes(t)));
+  const half = Math.ceil(nav.length / 2);
   const navItem = (n: (typeof NAV)[number]) => (
     <NavLink key={n.to} to={n.to} end={n.to === "/"} onClick={() => window.scrollTo(0, 0)}><Icon name={n.icon} />{n.label}</NavLink>
   );
@@ -64,10 +70,10 @@ export function Shell() {
         </main>
       </div>
       <nav className="tabs">
-        <div className="in">
-          {NAV.slice(0, 3).map(navItem)}
+        <div className="in" style={{ gridTemplateColumns: `repeat(${nav.length + 1}, 1fr)` }}>
+          {nav.slice(0, half).map(navItem)}
           <button type="button" className="plusbtn" aria-label="Ajouter une saisie" onClick={() => sheet.open(<PlusSheet />)}><span><Icon name="plus" /></span></button>
-          {NAV.slice(3).map(navItem)}
+          {nav.slice(half).map(navItem)}
         </div>
       </nav>
     </>

@@ -27,6 +27,7 @@ export function Evolution({ types }: { types: EntryType[] }) {
   const [type, setType] = useState<EntryType>(types[0]);
   const [range, setRange] = useState<number>(7);
   const current = types.includes(type) ? type : types[0];
+  if (!current) return null;
   return (
     <>
       <h2 className="sec">Évolution</h2>
