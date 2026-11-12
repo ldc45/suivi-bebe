@@ -5,10 +5,11 @@ import { EntrySheet } from "@/entries/EntrySheet";
 import { ENTRY_META } from "@/entries/types";
 import { num } from "@/lib/format";
 import { computeAlerts, entriesOfDay, sumBottles, timeIn, visibleTypes } from "@/lib/rules";
-import { ago, dayLabel, dayRange, daysEnding, dur, hm } from "@/lib/time";
+import { dayLabel, dayRange, daysEnding, dur, hm } from "@/lib/time";
 import { DayNav } from "@/ui/DayNav";
 import { useSheet } from "@/ui/Overlay";
 import { Legend, Timeline } from "@/ui/Timeline";
+import { lookOf, POO_COLOR } from "@/entries/look";
 import { Dial } from "./Dial";
 import { MedCards } from "./MedCards";
 import { OneTap } from "./OneTap";
@@ -30,10 +31,19 @@ export function AccueilPage() {
   if (isToday) {
     if (sleeping) { big = dur(now - sleeping.startedAt); cap = "de sommeil"; }
     else if (lastFeed) { big = dur(now - lastFeed.startedAt); cap = `depuis le dernier ${lastFeed.type === "bottle" ? "biberon" : "allaitement"}`; }
-    sub = sleeping && lastFeed ? `Dernier repas ${ago(lastFeed.startedAt, now)}` : lastDiaper ? `Couche ${ago(lastDiaper.startedAt, now)}` : "";
   } else {
     const feeds = day.filter((e) => e.type === "bottle" || e.type === "breastfeeding");
     big = String(feeds.length); cap = "repas ce jour-là"; sub = feeds.length ? `dernier à ${hm(feeds[0].startedAt)}` : "";
+  }
+
+  // « Depuis » : sorti du cadran pour lui laisser de la place. Le dernier repas n’y figure que si le cadran
+  // affiche déjà autre chose (sommeil en cours).
+  const lastPoo = entries.find((e) => e.type === "diaper" && e.data.poo);
+  const since: { key: string; label: string; e: (typeof entries)[number]; color: string }[] = [];
+  if (isToday) {
+    if (sleeping && lastFeed) since.push({ key: "feed", label: "Repas", e: lastFeed, color: ENTRY_META[lastFeed.type].color });
+    if (vis.includes("diaper") && lastDiaper) since.push({ key: "diaper", label: "Couche", e: lastDiaper, color: lookOf(lastDiaper).color });
+    if (vis.includes("diaper") && lastPoo) since.push({ key: "poo", label: "Caca", e: lastPoo, color: POO_COLOR });
   }
 
   const stats: [string, string][] = [];
@@ -59,6 +69,15 @@ export function AccueilPage() {
       <Dial day={viewDay} entries={entries} now={now} center={<><div className="big num">{big}</div><div className="cap">{cap}</div>{sub && <div className="sub">{sub}</div>}</>} />
       <div className="daystats">{stats.map(([v, l]) => <div key={l}><span className="num">{v}</span><span>{l}</span></div>)}</div>
       <OneTap />
+      {since.length > 0 && (
+        <div className="since" role="group" aria-label="Temps écoulé depuis le dernier repas, la dernière couche et le dernier caca">
+          {since.map((x) => (
+            <button key={x.key} type="button" style={{ "--c": x.color } as CSSProperties} onClick={() => sheet.open(<EntrySheet type={x.e.type} entry={x.e} />)}>
+              <span>{x.label}</span><b className="num">{dur(now - x.e.startedAt)}</b><span>depuis {hm(x.e.startedAt)}</span>
+            </button>
+          ))}
+        </div>
+      )}
       <MedCards />
       {alerts.length > 0 && (
         <div className="alerts">

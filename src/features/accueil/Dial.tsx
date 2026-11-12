@@ -12,7 +12,7 @@ import { dayRange, hm, MIN, todayKey } from "@/lib/time";
  * - soins : couches, traitements, température, pesées (RC).
  */
 const C = 160, RS = 147, WS = 16, RF = 116, WF = 28, RC = 82, WC = 24;
-const ICON_F = 13, ICON_C = 11;
+const ICON_F = 13, ICON_C = 11, ICON_S = 11;
 
 interface Placed { key: string; e: Entry; a: number; r: number; z: number }
 
@@ -55,7 +55,7 @@ export function Dial({ day, entries, now, center }: { day: string; entries: Entr
   };
 
   const sleepArcs: ReactNode[] = [], feedArcs: ReactNode[] = [];
-  const onFeed: Placed[] = [], onCare: Placed[] = [];
+  const onSleep: Placed[] = [], onFeed: Placed[] = [], onCare: Placed[] = [];
   for (const e of entries) {
     let [a, b] = interval(e, now);
     if (b < s0 || a >= end) continue;
@@ -64,6 +64,8 @@ export function Dial({ day, entries, now, center }: { day: string; entries: Entr
       // Anneau du sommeil : un arc par sommeil, même court (au moins 6 minutes visibles).
       const b2 = Math.max(b, a + 6 * MIN);
       sleepArcs.push(<path key={e.id} d={arc(ang(a), ang(b2), RS)} fill="none" stroke={ENTRY_META.sleep.color} strokeWidth={WS - 2} strokeLinecap="round"><title>{`Sommeil ${hm(e.startedAt)}${e.inProgress ? ", en cours" : ` à ${hm(e.endedAt ?? b)}`}`}</title></path>);
+      // Pictogramme au milieu de l’arc, quand il est assez long pour le porter.
+      if (b - a >= 25 * MIN) onSleep.push({ key: `${e.id}-i`, e, a: ang(a + (b - a) / 2), r: RS, z: ICON_S });
     } else if (e.type === "tummy" && b - a > 8 * MIN) {
       feedArcs.push(<path key={e.id} d={arc(ang(a), ang(b), RF)} fill="none" stroke={ENTRY_META.tummy.color} strokeWidth={WF - 2} strokeLinecap="round" opacity={0.9} />);
       onFeed.push({ key: `${e.id}-i`, e, a: ang(a + (b - a) / 2), r: RF, z: ICON_F - 1 });
@@ -101,7 +103,7 @@ export function Dial({ day, entries, now, center }: { day: string; entries: Entr
         {[0, 6, 12, 18].map((h) => { const [x, y] = pt((h / 24) * 2 * Math.PI - Math.PI / 2, 61); return <text key={h} x={x} y={y + 4} fill="var(--muted)" fontSize={11} textAnchor="middle">{h} h</text>; })}
         {[0, 3, 6, 9, 12, 15, 18, 21].map((h) => { const a = (h / 24) * 2 * Math.PI - Math.PI / 2, [x1, y1] = pt(a, RC + WC / 2 + 2), [x2, y2] = pt(a, RF - WF / 2 - 2); return <line key={h} x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--muted)" strokeOpacity={h % 6 ? 0.3 : 0.6} strokeWidth={1.5} strokeLinecap="round" />; })}
         {sleepArcs}{feedArcs}
-        {spread(onFeed).map(icon)}{spread(onCare).map(icon)}
+        {spread(onSleep).map(icon)}{spread(onFeed).map(icon)}{spread(onCare).map(icon)}
         {live && <>
           <path d={arc(an, dayEnd, RS)} fill="none" stroke="var(--bg)" strokeWidth={WS + 2} opacity={0.45} />
           <path d={arc(an, dayEnd, RF)} fill="none" stroke="var(--bg)" strokeWidth={WF + 2} opacity={0.45} />

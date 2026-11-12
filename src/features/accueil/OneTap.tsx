@@ -1,6 +1,7 @@
 import { type CSSProperties, useEffect, useState } from "react";
 import { useApp } from "@/app/AppContext";
 import { newId, useEntryMutations } from "@/entries/api";
+import { PEE_COLOR } from "@/entries/look";
 import { ENTRY_META, type Entry, type EntryOf, MILK_LABEL } from "@/entries/types";
 import { num } from "@/lib/format";
 import { visibleTypes } from "@/lib/rules";
@@ -28,7 +29,7 @@ export function OneTap() {
   };
   const base = () => ({ id: newId(), babyId: baby.id, startedAt: Date.now(), endedAt: null, inProgress: false, note: null, medicationId: null, createdBy: userId });
 
-  const actions: { key: string; color: string; icon: "bottle" | "diaper"; label: string; detail: string; run: () => void }[] = [];
+  const actions: { key: string; color: string; icon: "bottle" | "pee"; label: string; detail: string; run: () => void }[] = [];
   if (vis.includes("bottle") && lastBottle) {
     const { ml, milk } = lastBottle.data;
     actions.push({
@@ -38,7 +39,7 @@ export function OneTap() {
   }
   if (vis.includes("diaper")) {
     actions.push({
-      key: "pee", color: ENTRY_META.diaper.color, icon: "diaper", label: "Couche pipi", detail: "Sans selles",
+      key: "pee", color: PEE_COLOR, icon: "pee", label: "Couche pipi", detail: "Sans selles",
       run: () => record({ ...base(), type: "diaper", data: { pee: true, poo: false } }, "Couche pipi enregistrée"),
     });
   }
