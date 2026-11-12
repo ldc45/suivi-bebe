@@ -109,6 +109,21 @@ export function sleepOfDay(entries: Entry[], k: string, now = Date.now()) {
   return { total: total / H, night: night / H, day: (total - night) / H };
 }
 
+/**
+ * Heure estimée du prochain repas : dernier repas + écart moyen entre les repas des dernières 24 heures.
+ * Les écarts de plus de 8 h (oubli de saisie probable) sont ignorés ; l’écart retenu est borné entre 1 h 30 et 5 h.
+ * Sans assez de données (moins de deux écarts), on retient 3 h. `entries` est trié du plus récent au plus ancien.
+ */
+export function nextFeed(entries: Entry[], now = Date.now()): { at: number; gap: number; last: Entry } | null {
+  const feeds = entries.filter((e) => (e.type === "bottle" || e.type === "breastfeeding") && e.startedAt <= now);
+  if (!feeds.length) return null;
+  const recent = feeds.filter((e) => now - e.startedAt < 24 * H).map((e) => e.startedAt).sort((a, b) => a - b);
+  const gaps = recent.slice(1).map((t, i) => t - recent[i]).filter((g) => g > 20 * 60_000 && g < 8 * H);
+  const avg = gaps.length >= 2 ? gaps.reduce((a, g) => a + g, 0) / gaps.length : 3 * H;
+  const gap = Math.min(5 * H, Math.max(1.5 * H, avg));
+  return { at: feeds[0].startedAt + gap, gap, last: feeds[0] };
+}
+
 export type AlertLevel = "urgent" | "attention" | "rappel" | "info";
 export interface Alert { level: AlertLevel; title: string; text: string }
 

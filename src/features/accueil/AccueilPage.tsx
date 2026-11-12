@@ -4,7 +4,7 @@ import { TimeRow } from "@/entries/rows";
 import { EntrySheet } from "@/entries/EntrySheet";
 import { ENTRY_META } from "@/entries/types";
 import { num } from "@/lib/format";
-import { computeAlerts, entriesOfDay, sumBottles, timeIn, visibleTypes } from "@/lib/rules";
+import { computeAlerts, entriesOfDay, nextFeed, sumBottles, timeIn, visibleTypes } from "@/lib/rules";
 import { dayLabel, dayRange, daysEnding, dur, hm } from "@/lib/time";
 import { DayNav } from "@/ui/DayNav";
 import { useSheet } from "@/ui/Overlay";
@@ -29,10 +29,16 @@ export function AccueilPage() {
   const lastDiaper = entries.find((e) => e.type === "diaper");
   const sleeping = entries.find((e) => e.type === "sleep" && e.inProgress);
 
-  let big = "–", cap = "aucun repas enregistré", sub = "";
+  let big = "–", cap = "aucun repas enregistré", sub = "", pre = "";
+  const next = isToday && !sleeping ? nextFeed(entries, now) : null;
   if (isToday) {
     if (sleeping) { big = dur(now - sleeping.startedAt); cap = "de sommeil"; }
-    else if (lastFeed) { big = dur(now - lastFeed.startedAt); cap = `depuis le dernier ${lastFeed.type === "bottle" ? "biberon" : "allaitement"}`; }
+    else if (next) {
+      // Heure estimée du prochain repas : le temps écoulé depuis le dernier est déjà dans la case sous les boutons rapides.
+      pre = `prochain ${next.last.type === "bottle" ? "biberon" : "repas"} vers`;
+      big = hm(next.at);
+      cap = next.at > now ? `dans ${dur(next.at - now)}` : `prévu il y a ${dur(now - next.at)}`;
+    }
   } else {
     const feeds = day.filter((e) => e.type === "bottle" || e.type === "breastfeeding");
     big = String(feeds.length); cap = "repas ce jour-là"; sub = feeds.length ? `dernier à ${hm(feeds[0].startedAt)}` : "";
@@ -65,7 +71,7 @@ export function AccueilPage() {
           <button type="button" className="btn primary" onClick={() => sheet.open(<EntrySheet type={e.type} entry={e} />)}>{e.type === "sleep" ? "Réveil" : "Terminer"}</button>
         </div>
       ))}
-      <Dial day={viewDay} entries={entries} now={now} center={<><div className="big num">{big}</div><div className="cap">{cap}</div>{sub && <div className="sub">{sub}</div>}</>} />
+      <Dial day={viewDay} entries={entries} now={now} center={<>{pre && <div className="pre">{pre}</div>}<div className="big num">{big}</div><div className="cap">{cap}</div>{sub && <div className="sub">{sub}</div>}</>} />
       <div className="daystats">{stats.map(([v, l]) => <div key={l}><span className="num">{v}</span><span>{l}</span></div>)}</div>
       <OneTap />
       {since.length > 0 && (
