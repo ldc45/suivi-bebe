@@ -91,3 +91,5 @@
 .seg{ display:flex; gap:4px; border-bottom:1px solid var(--line); margin:12px 0 16px; }
 .seg button{ border:0; background:none; padding:9px 12px; font-size:.9rem; color:var(--muted); border-bottom:2px solid transparent; margin-bottom:-1px; }
 .seg button[aria-pressed="true"]{ color:var(--text); font-weight:600; border-bottom-color:var(--moon); }
+.syncbar{ background:var(--info-bg); border-radius:0 12px 12px 0; padding:8px 12px 8px 14px; margin:4px 0 12px; }
+.syncbar p{ margin:0; }

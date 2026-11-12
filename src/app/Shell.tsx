@@ -16,6 +16,7 @@ import { ageLabel } from "@/lib/time";
 import { Icon } from "@/ui/Icon";
 import type { IconName } from "@/ui/icons";
 import { useSheet } from "@/ui/Overlay";
+import { SyncStatus } from "@/ui/SyncStatus";
 import { useApp } from "./AppContext";
 
 /** Onglets du bas ; `types` : l’onglet n’apparaît que si l’un de ces types est affiché (Réglages). */
@@ -55,6 +56,7 @@ export function Shell() {
             <button type="button" className={`gear${pathname === "/reglages" ? " on" : ""}`} aria-label="Réglages" onClick={() => navigate("/reglages")}><Icon name="sliders" /></button>
           </div>
         </header>
+        <SyncStatus />
         <main>
           <Routes>
             <Route path="/" element={<AccueilPage />} />

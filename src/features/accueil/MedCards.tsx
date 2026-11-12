@@ -34,7 +34,8 @@ export function MedCards() {
     let ts = Date.now();
     if (!isToday) { const d = keyToDate(viewDay), [h, mi] = (m.timeOfDay ?? "12:00").split(":").map(Number); d.setHours(h, mi, 0, 0); ts = Math.min(d.getTime(), Date.now()); }
     const e: EntryOf<"medication"> = { id: newId(), babyId: baby.id, type: "medication", startedAt: ts, endedAt: null, inProgress: false, note: null, medicationId: m.id, createdBy: userId, data: { name: m.name, dose: m.dose ?? "" } };
-    save.mutate(e, { onSuccess: () => toast(`${m.name} validée`, () => remove.mutate(e.id)), onError: () => toast("Enregistrement impossible.") });
+    save.mutate(e);
+    toast(`${m.name} : prise notée`, () => remove.mutate(e.id));
   };
 
   return (

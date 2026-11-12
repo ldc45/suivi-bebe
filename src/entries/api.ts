@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { type QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { DAY } from "@/lib/time";
 import type { Entry, EntryType } from "./types";
@@ -50,22 +50,83 @@ async function fetchEntries(babyId: string, since: number): Promise<Entry[]> {
 
 /**
  * Saisies des WINDOW_DAYS derniers jours (plus l’historique complet des pesées et des repas solides),
- * triées de la plus récente à la plus ancienne.
+ * triées de la plus récente à la plus ancienne. Les saisies pas encore envoyées au serveur
+ * (hors ligne) sont superposées au résultat, pour qu’un rechargement ne les fasse pas disparaître.
  */
 export function useEntries(babyId: string | undefined) {
+  const qc = useQueryClient();
   return useQuery({
     queryKey: entriesKey(babyId),
     enabled: !!babyId,
-    queryFn: () => fetchEntries(babyId!, Date.now() - WINDOW_DAYS * DAY),
+    queryFn: async () => withPending(qc, babyId!, await fetchEntries(babyId!, Date.now() - WINDOW_DAYS * DAY)),
     staleTime: 30_000,
   });
 }
 
 const sortDesc = (list: Entry[]) => [...list].sort((a, b) => b.startedAt - a.startedAt);
 
+/* ---------- Envoi des saisies, y compris hors ligne ---------- */
+
+export const SAVE_KEY = ["entries", "save"] as const;
+export const REMOVE_KEY = ["entries", "remove"] as const;
+
+/** Échec réseau (pas de réponse du serveur), par opposition à un refus du serveur. */
+export function isNetworkError(err: unknown): boolean {
+  if (err instanceof TypeError) return true;
+  const msg = String((err as { message?: string } | null)?.message ?? err ?? "");
+  return /fetch|network|load failed|timeout/i.test(msg);
+}
+
+/** Saisies en attente d’envoi (ajouts, modifications, suppressions), dans l’ordre où elles ont été faites. */
+function pending(qc: QueryClient) {
+  return qc.getMutationCache().getAll()
+    .filter((m) => m.state.status === "pending" || m.state.isPaused)
+    .sort((a, b) => a.state.submittedAt - b.state.submittedAt);
+}
+
+function withPending(qc: QueryClient, babyId: string, list: Entry[]): Entry[] {
+  let out = list;
+  for (const m of pending(qc)) {
+    const k = m.options.mutationKey?.[1];
+    if (k === "save") { const e = m.state.variables as Entry; if (e.babyId === babyId) out = [...out.filter((x) => x.id !== e.id), e]; }
+    if (k === "remove") { const id = m.state.variables as string; out = out.filter((x) => x.id !== id); }
+  }
+  return out === list ? list : sortDesc(out);
+}
+
+/**
+ * Fonctions d’envoi enregistrées une fois pour toutes sur le client : une saisie faite hors ligne
+ * est gardée sur le téléphone (voir main.tsx) et repart au retour du réseau, même après avoir fermé l’appli.
+ * `scope` envoie les saisies une par une, dans l’ordre (une annulation passe après l’ajout qu’elle annule).
+ */
+export function registerEntryMutations(qc: QueryClient) {
+  const common = {
+    scope: { id: "entries" },
+    // Coupure ou réseau très faible : on réessaie longtemps ; refus du serveur : une seule nouvelle tentative.
+    retry: (count: number, err: unknown) => (isNetworkError(err) ? count < 30 : count < 1),
+    retryDelay: (count: number) => Math.min(30_000, 1000 * 2 ** count),
+    onSettled: () => qc.isMutating({ mutationKey: ["entries"] }) <= 1 && qc.invalidateQueries({ queryKey: ["entries"] }),
+  };
+  qc.setMutationDefaults(SAVE_KEY, {
+    ...common,
+    mutationFn: async (e: Entry) => {
+      const { error } = await supabase.from("entries").upsert(toRow(e));
+      if (error) throw error;
+    },
+  });
+  qc.setMutationDefaults(REMOVE_KEY, {
+    ...common,
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("entries").delete().eq("id", id);
+      if (error) throw error;
+    },
+  });
+}
+
 /**
  * Création, modification et suppression avec mise à jour optimiste :
  * l’écran change immédiatement, et revient en arrière si le serveur refuse.
+ * Sans réseau, la saisie reste affichée et part dès que la connexion revient.
  */
 export function useEntryMutations(babyId: string | undefined) {
   const qc = useQueryClient();
@@ -78,26 +139,17 @@ export function useEntryMutations(babyId: string | undefined) {
     return { prev };
   };
   const rollback = (_e: unknown, _v: unknown, ctx?: { prev?: Entry[] }) => { if (ctx?.prev) qc.setQueryData(key, ctx.prev); };
-  const settle = () => qc.invalidateQueries({ queryKey: key });
 
-  const save = useMutation({
-    mutationFn: async (e: Entry) => {
-      const { error } = await supabase.from("entries").upsert(toRow(e));
-      if (error) throw error;
-    },
+  const save = useMutation<void, Error, Entry, { prev?: Entry[] }>({
+    mutationKey: SAVE_KEY,
     onMutate: (e) => optimistic((list) => [...list.filter((x) => x.id !== e.id), e]),
     onError: rollback,
-    onSettled: settle,
   });
 
-  const remove = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("entries").delete().eq("id", id);
-      if (error) throw error;
-    },
+  const remove = useMutation<void, Error, string, { prev?: Entry[] }>({
+    mutationKey: REMOVE_KEY,
     onMutate: (id) => optimistic((list) => list.filter((x) => x.id !== id)),
     onError: rollback,
-    onSettled: settle,
   });
 
   return { save, remove };

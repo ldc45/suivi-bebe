@@ -142,13 +142,13 @@ export function EntrySheet({ type, entry: given, initialTs }: Props) {
     }
   }
 
+  // L’écran est mis à jour tout de suite ; l’envoi au serveur se fait en arrière-plan, même hors ligne.
   const persist = (e: Entry, msg: string, undoable: boolean) => {
+    if (busy) return;
     setBusy(true);
-    save.mutate(e, {
-      onSuccess: () => { sheet.close(); toast(msg, undoable ? () => remove.mutate(e.id) : undefined); },
-      onError: () => toast("Enregistrement impossible. Vérifiez la connexion."),
-      onSettled: () => setBusy(false),
-    });
+    save.mutate(e);
+    sheet.close();
+    toast(msg, undoable ? () => remove.mutate(e.id) : undefined);
   };
   const onSave = () => {
     const r = build();
@@ -166,11 +166,10 @@ export function EntrySheet({ type, entry: given, initialTs }: Props) {
     persist({ ...entry, inProgress: false, endedAt: now } as Entry, `${meta.label} : ${dur(now - entry.startedAt)}`, false);
   };
   const onDelete = () => {
-    if (!entry || !confirm("Supprimer cette saisie ?")) return;
-    remove.mutate(entry.id, {
-      onSuccess: () => { sheet.close(); toast("Saisie supprimée", () => save.mutate(entry)); },
-      onError: () => toast("Suppression impossible. Vérifiez la connexion."),
-    });
+    if (!entry) return;
+    remove.mutate(entry.id);
+    sheet.close();
+    toast("Saisie supprimée", () => save.mutate(entry));
   };
 
   const switchTo = (t: EntryType) => {

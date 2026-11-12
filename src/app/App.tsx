@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useIsRestoring, useQueryClient } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import { useBabies, useHousehold } from "@/babies/api";
 import { FirstBaby, Loading, NotConfigured, NotMember } from "@/features/auth/Gates";
@@ -28,6 +30,10 @@ function Household({ email, userId }: { email: string; userId: string }) {
 
 export function App() {
   const session = useSession();
+  const qc = useQueryClient();
+  const restoring = useIsRestoring();
+  // Déconnexion : on efface les données gardées sur le téléphone.
+  useEffect(() => { if (session === null && !restoring) qc.clear(); }, [session, restoring, qc]);
   if (!isConfigured) return <div className="wrap"><NotConfigured /></div>;
   if (session === undefined) return <Loading />;
   if (!session) return <div className="wrap"><LoginPage /></div>;
