@@ -22,9 +22,12 @@ const OFFSETS: [number, string][] = [[0, "Maintenant"], [5, "−5 min"], [15, "�
 interface Props { type: EntryType; entry?: Entry; initialTs?: number }
 
 /** Fenêtre de saisie et de modification, pour tous les types d’activité. */
-export function EntrySheet({ type, entry, initialTs }: Props) {
+export function EntrySheet({ type, entry: given, initialTs }: Props) {
   const app = useApp();
   const { baby, entries, medications, viewDay, isToday } = app;
+  // Un seul chrono par type : si un sommeil ou une séance est déjà en cours, on ouvre celui-ci.
+  const running = !given && ENTRY_META[type].timer ? entries.find((x) => x.type === type && x.inProgress) : undefined;
+  const entry = given ?? running;
   const sheet = useSheet();
   const toast = useToast();
   const { save, remove } = useEntryMutations(baby?.id);
@@ -123,7 +126,11 @@ export function EntrySheet({ type, entry, initialTs }: Props) {
       }
       case "solid": return food.trim() ? { ...b, type, data: { food: food.trim(), quantity: quantity.trim() || undefined, reaction } } : "Indiquez l’aliment.";
       case "temperature": { const c = Math.round(parseNum(celsius) * 10) / 10; return c >= 30 && c <= 45 ? { ...b, type, data: { celsius: c, method } } : "Indiquez une température entre 30 et 45 °C."; }
-      case "tummy": { const m = parseNum(duration); return m > 0 ? { ...b, type, data: {}, endedAt: ts + m * MIN } : "Indiquez la durée, ou utilisez Démarrer."; }
+      case "tummy": {
+        const m = parseNum(duration);
+        if (entry?.inProgress && !m) return { ...b, type, data: {}, inProgress: true };
+        return m > 0 ? { ...b, type, data: {}, endedAt: ts + m * MIN } : "Indiquez la durée, ou utilisez Démarrer.";
+      }
       case "growth": {
         const k = parseNum(kg), c = parseNum(cm);
         if (!k && !c) return "Indiquez un poids ou une taille.";
@@ -149,6 +156,7 @@ export function EntrySheet({ type, entry, initialTs }: Props) {
     persist(r, editing ? "Modification enregistrée" : `${meta.label} enregistré${["diaper", "temperature", "growth"].includes(type) ? "e" : ""}`, !editing);
   };
   const onStart = () => {
+    if (entries.some((x) => x.type === type && x.inProgress)) return toast(type === "sleep" ? "Un sommeil est déjà en cours." : "Une séance est déjà en cours.");
     const ts = type === "tummy" && chip !== 0 ? Math.min(fromInputs(date, time) || Date.now(), Date.now()) : Date.now();
     persist({ ...base(ts), type: type as "sleep", data: {}, inProgress: true }, type === "sleep" ? "Bonne sieste" : "Chrono lancé", true);
   };
