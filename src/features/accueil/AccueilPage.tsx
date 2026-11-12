@@ -9,7 +9,9 @@ import { dayLabel, dayRange, daysEnding, dur, hm } from "@/lib/time";
 import { DayNav } from "@/ui/DayNav";
 import { useSheet } from "@/ui/Overlay";
 import { Legend, Timeline } from "@/ui/Timeline";
-import { lookOf, POO_COLOR } from "@/entries/look";
+import { diaperKind } from "@/entries/describe";
+import { type Look, lookBackground, lookOf } from "@/entries/look";
+import { Icon } from "@/ui/Icon";
 import { Dial } from "./Dial";
 import { MedCards } from "./MedCards";
 import { OneTap } from "./OneTap";
@@ -36,14 +38,11 @@ export function AccueilPage() {
     big = String(feeds.length); cap = "repas ce jour-là"; sub = feeds.length ? `dernier à ${hm(feeds[0].startedAt)}` : "";
   }
 
-  // « Depuis » : sorti du cadran pour lui laisser de la place. Le dernier repas n’y figure que si le cadran
-  // affiche déjà autre chose (sommeil en cours).
-  const lastPoo = entries.find((e) => e.type === "diaper" && e.data.poo);
-  const since: { key: string; label: string; e: (typeof entries)[number]; color: string }[] = [];
+  // Deux cases sous les boutons rapides : le dernier repas, et la dernière couche avec son contenu.
+  const since: { key: string; label: string; detail: string; e: (typeof entries)[number]; look: Look }[] = [];
   if (isToday) {
-    if (sleeping && lastFeed) since.push({ key: "feed", label: "Repas", e: lastFeed, color: ENTRY_META[lastFeed.type].color });
-    if (vis.includes("diaper") && lastDiaper) since.push({ key: "diaper", label: "Couche", e: lastDiaper, color: lookOf(lastDiaper).color });
-    if (vis.includes("diaper") && lastPoo) since.push({ key: "poo", label: "Caca", e: lastPoo, color: POO_COLOR });
+    if (lastFeed) since.push({ key: "feed", label: `Dernier ${lastFeed.type === "bottle" ? "biberon" : "repas"}`, detail: lastFeed.type === "bottle" ? `${num(lastFeed.data.ml)} ml` : ENTRY_META[lastFeed.type].short, e: lastFeed, look: lookOf(lastFeed) });
+    if (vis.includes("diaper") && lastDiaper?.type === "diaper") since.push({ key: "diaper", label: "Dernière couche", detail: diaperKind(lastDiaper), e: lastDiaper, look: lookOf(lastDiaper) });
   }
 
   const stats: [string, string][] = [];
@@ -70,10 +69,11 @@ export function AccueilPage() {
       <div className="daystats">{stats.map(([v, l]) => <div key={l}><span className="num">{v}</span><span>{l}</span></div>)}</div>
       <OneTap />
       {since.length > 0 && (
-        <div className="since" role="group" aria-label="Temps écoulé depuis le dernier repas, la dernière couche et le dernier caca">
+        <div className="since" role="group" aria-label="Temps écoulé depuis le dernier repas et la dernière couche">
           {since.map((x) => (
-            <button key={x.key} type="button" style={{ "--c": x.color } as CSSProperties} onClick={() => sheet.open(<EntrySheet type={x.e.type} entry={x.e} />)}>
-              <span>{x.label}</span><b className="num">{dur(now - x.e.startedAt)}</b><span>depuis {hm(x.e.startedAt)}</span>
+            <button key={x.key} type="button" style={{ "--c": x.look.color } as CSSProperties} onClick={() => sheet.open(<EntrySheet type={x.e.type} entry={x.e} />)}>
+              <span className="lic" style={x.look.color2 ? { background: lookBackground(x.look, 30) } : undefined}><Icon name={x.look.icon} /></span>
+              <span className="st"><span>{x.label}</span><b className="num">il y a {dur(now - x.e.startedAt)}</b><span>{x.detail}, à {hm(x.e.startedAt)}</span></span>
             </button>
           ))}
         </div>

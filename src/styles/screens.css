@@ -104,8 +104,10 @@
 .onetap:has(> :only-child){ grid-template-columns:1fr; }
 .onetap button:disabled{ opacity:.55; }
 
-/* « Depuis » : dernier repas, dernière couche, dernier caca */
-.since{ display:grid; grid-template-columns:repeat(auto-fit, minmax(0, 1fr)); gap:8px; margin:10px 0 4px; }
-.since button{ display:flex; flex-direction:column; align-items:flex-start; gap:2px; min-width:0; border:0; border-radius:14px; padding:10px 12px; text-align:left; background:var(--surface); box-shadow:inset 3px 0 0 var(--c); }
-.since b{ font-size:1.25rem; font-weight:400; line-height:1.15; white-space:nowrap; }
-.since span{ font-size:.84rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+/* Dernier repas et dernière couche (sous les boutons rapides) */
+.since{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0 4px; }
+.since:has(> :only-child){ grid-template-columns:1fr; }
+.since button{ display:flex; align-items:center; gap:10px; min-width:0; border:0; border-radius:16px; padding:10px 12px; text-align:left; background:var(--surface); }
+.since .st{ display:flex; flex-direction:column; min-width:0; }
+.since b{ font-size:1.15rem; font-weight:400; line-height:1.2; white-space:nowrap; }
+.since .st span{ font-size:.84rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
