@@ -11,6 +11,7 @@ import { useSheet } from "@/ui/Overlay";
 import { Legend, Timeline } from "@/ui/Timeline";
 import { Dial } from "./Dial";
 import { MedCards } from "./MedCards";
+import { OneTap } from "./OneTap";
 
 export function AccueilPage() {
   const { baby, entries, viewDay, isToday, now } = useApp();
@@ -57,6 +58,7 @@ export function AccueilPage() {
       ))}
       <Dial day={viewDay} entries={entries} now={now} center={<><div className="big num">{big}</div><div className="cap">{cap}</div>{sub && <div className="sub">{sub}</div>}</>} />
       <div className="daystats">{stats.map(([v, l]) => <div key={l}><span className="num">{v}</span><span>{l}</span></div>)}</div>
+      <OneTap />
       <MedCards />
       {alerts.length > 0 && (
         <div className="alerts">

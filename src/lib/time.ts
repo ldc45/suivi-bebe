@@ -43,9 +43,10 @@ export function hm(ms: number): string {
 }
 export function dur(ms: number): string {
   const m = Math.max(0, Math.round(ms / MIN));
-  if (m < 60) return `${m} min`;
+  // Espaces insécables : une durée ne se coupe jamais en fin de ligne (« 2 » puis « h »).
+  if (m < 60) return `${m}\u00a0min`;
   const h = Math.floor(m / 60), r = m % 60;
-  return r ? `${h} h ${pad(r)}` : `${h} h`;
+  return r ? `${h}\u00a0h\u00a0${pad(r)}` : `${h}\u00a0h`;
 }
 export function ago(ms: number, now = Date.now()): string {
   const d = now - ms;

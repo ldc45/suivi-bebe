@@ -1,6 +1,7 @@
-import { type CSSProperties, lazy, Suspense } from "react";
+import { type CSSProperties, lazy, Suspense, useEffect } from "react";
 import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { avatarColor, BabySwitcher, initial } from "@/babies/BabySheet";
+import { EntrySheet } from "@/entries/EntrySheet";
 import { PlusSheet } from "@/entries/PlusSheet";
 import { type EntryType, FEEDS } from "@/entries/types";
 import { AccueilPage } from "@/features/accueil/AccueilPage";
@@ -32,6 +33,28 @@ const NAV: { to: string; label: string; icon: IconName; types?: EntryType[] }[] 
   { to: "/tummy", label: "Tummy", icon: "tummy", types: ["tummy"] },
 ];
 
+/** Raccourcis de l’icône de l’appli : « /?ajout=repas » ouvre la saisie correspondante. */
+const SHORTCUTS: Record<string, EntryType | "repas"> = { repas: "repas", couche: "diaper", sommeil: "sleep" };
+
+function useShortcut() {
+  const { baby, entries, entriesLoading } = useApp();
+  const sheet = useSheet();
+  const navigate = useNavigate();
+  const { search } = useLocation();
+  useEffect(() => {
+    const wanted = new URLSearchParams(search).get("ajout");
+    // On attend les saisies : le formulaire reprend la dernière quantité, et un sommeil en cours est rouvert.
+    if (!wanted || !baby || entriesLoading) return;
+    navigate("/", { replace: true });
+    const target = SHORTCUTS[wanted];
+    if (!target) return;
+    const vis = visibleTypes(baby);
+    const feeds = vis.filter((t) => FEEDS.includes(t));
+    const type = target === "repas" ? entries.find((e) => feeds.includes(e.type))?.type ?? feeds[0] : target;
+    if (type && vis.includes(type)) sheet.open(<EntrySheet key={`raccourci-${Date.now()}`} type={type} />);
+  }, [search, baby, entries, entriesLoading, navigate, sheet]);
+}
+
 export function Shell() {
   const { baby, babies } = useApp();
   const sheet = useSheet();
@@ -42,6 +65,7 @@ export function Shell() {
   const nav = NAV.filter((n) => !n.types || n.types.some((t) => vis.includes(t)));
   const half = Math.ceil(nav.length / 2);
   const { night } = useDisplay();
+  useShortcut();
   const navItem = (n: (typeof NAV)[number]) => (
     <NavLink key={n.to} to={n.to} end={n.to === "/"} onClick={() => window.scrollTo(0, 0)}><Icon name={n.icon} />{n.label}</NavLink>
   );

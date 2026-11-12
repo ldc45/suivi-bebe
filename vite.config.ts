@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["icons/icon-180.png", "icons/icon.svg"],
+      includeAssets: ["icons/icon-180.png", "icons/icon.svg", "icons/shortcut-*.png"],
       manifest: {
         name: "Suivi bébé",
         short_name: "Suivi bébé",
@@ -22,6 +22,12 @@ export default defineConfig({
           { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
           { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
           { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+        ],
+        // Appui long sur l’icône de l’appli (Android) : ouvre directement la saisie (voir useShortcut dans Shell).
+        shortcuts: [
+          { name: "Repas", short_name: "Repas", url: "/?ajout=repas", icons: [{ src: "/icons/shortcut-repas.png", sizes: "96x96", type: "image/png" }] },
+          { name: "Couche", short_name: "Couche", url: "/?ajout=couche", icons: [{ src: "/icons/shortcut-couche.png", sizes: "96x96", type: "image/png" }] },
+          { name: "Sommeil", short_name: "Sommeil", url: "/?ajout=sommeil", icons: [{ src: "/icons/shortcut-sommeil.png", sizes: "96x96", type: "image/png" }] },
         ],
       },
       workbox: {
