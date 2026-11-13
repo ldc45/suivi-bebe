@@ -10,6 +10,9 @@ export interface Thresholds {
   dropPct?: number;
   tummyMin?: number;
   mlPerKg?: number;
+  /** Délai pour donner un biberon préparé, en minutes : à température ambiante, et tiédi. */
+  prepRoomMin?: number;
+  prepWarmMin?: number;
 }
 
 export interface BabySettings {

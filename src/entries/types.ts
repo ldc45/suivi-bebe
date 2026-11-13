@@ -12,7 +12,8 @@ export type TempMethod = "rectal" | "axillary" | "forehead" | "ear";
 export type Place = "home" | "pediatrician" | "maternity";
 
 export interface DataMap {
-  bottle: { ml: number; milk: Milk };
+  /** Un biberon « préparé » (pas encore donné) est enregistré avec inProgress = true ; `warmed` : tiédi. */
+  bottle: { ml: number; milk: Milk; warmed?: boolean };
   breastfeeding: { left_min: number; right_min: number; first_side: Side };
   pumping: { left_ml: number; right_ml: number; duration_min?: number };
   diaper: { pee: boolean; poo: boolean; color?: StoolColor; texture?: StoolTexture; amount?: Amount };

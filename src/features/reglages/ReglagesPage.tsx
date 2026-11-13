@@ -101,13 +101,13 @@ function ThresholdsSection() {
   const toast = useToast();
   const update = useUpdateBaby(baby);
   const th = thresholds(baby);
-  const [v, setV] = useState({ fever: String(th.fever), wetMin: String(th.wetMin), gapH: th.gapAuto ? "" : String(th.gapH), dropPct: String(th.dropPct), tummyMin: String(th.tummyMin), mlPerKg: String(th.mlPerKg) });
+  const [v, setV] = useState({ fever: String(th.fever), wetMin: String(th.wetMin), gapH: th.gapAuto ? "" : String(th.gapH), dropPct: String(th.dropPct), tummyMin: String(th.tummyMin), mlPerKg: String(th.mlPerKg), prepRoomMin: String(th.prepRoomMin), prepWarmMin: String(th.prepWarmMin) });
   if (!baby) return null;
   const field = (k: keyof typeof v, label: string, step: number, placeholder?: string) => (
     <Field label={label} htmlFor={`t-${k}`}><input id={`t-${k}`} className="inp" type="number" inputMode="decimal" step={step} value={v[k]} placeholder={placeholder} onChange={(e) => setV({ ...v, [k]: e.target.value })} /></Field>
   );
   const save = () => {
-    const t: Thresholds = { fever: parseNum(v.fever) || 38, wetMin: Math.round(parseNum(v.wetMin)) || 6, dropPct: parseNum(v.dropPct) || 30, tummyMin: parseNum(v.tummyMin) || 30, mlPerKg: parseNum(v.mlPerKg) || 150 };
+    const t: Thresholds = { fever: parseNum(v.fever) || 38, wetMin: Math.round(parseNum(v.wetMin)) || 6, dropPct: parseNum(v.dropPct) || 30, tummyMin: parseNum(v.tummyMin) || 30, mlPerKg: parseNum(v.mlPerKg) || 150, prepRoomMin: Math.round(parseNum(v.prepRoomMin)) || 60, prepWarmMin: Math.round(parseNum(v.prepWarmMin)) || 30 };
     if (v.gapH !== "") t.gapH = parseNum(v.gapH);
     if (t.fever! < 37 || t.fever! > 40) return toast("Le seuil de fièvre doit être entre 37 et 40 °C.");
     update.mutate({ settings: { ...baby.settings, thresholds: t } }, { onSuccess: () => toast("Repères enregistrés") });
@@ -118,6 +118,7 @@ function ThresholdsSection() {
       <div className="row2">{field("fever", "Fièvre à partir de (°C)", 0.1)}{field("wetMin", "Couches mouillées min. sur 24 h", 1)}</div>
       <div className="row2">{field("gapH", "Repas au plus toutes les (h)", 0.5, `Auto : ${autoGap(ageDays(baby.birthDate)) || "désactivé"}`)}{field("dropPct", "Baisse de lait signalée (%)", 5)}</div>
       <div className="row2">{field("tummyMin", "Objectif de tummy time (min)", 5)}{field("mlPerKg", "Repère de lait (ml/kg/jour)", 5)}</div>
+      <div className="row2">{field("prepRoomMin", "Biberon préparé, ambiant (min)", 5)}{field("prepWarmMin", "Biberon préparé, tiédi (min)", 5)}</div>
       <p className="small muted">Repas : laissez vide pour le réglage automatique selon l’âge, ou mettez 0 pour désactiver ce rappel. Le repère de lait est indicatif et à valider avec votre pédiatre.</p>
       <button type="button" className="btn primary wide block" onClick={save}>Enregistrer les repères</button>
     </div>

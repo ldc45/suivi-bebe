@@ -9,7 +9,7 @@ import { num } from "./format";
 import { ago, ageDays, DAY, dayKey, dayRange, H, keyToDate, overlap } from "./time";
 
 export interface ResolvedThresholds {
-  fever: number; wetMin: number; gapH: number; gapAuto: boolean; dropPct: number; tummyMin: number; mlPerKg: number;
+  fever: number; wetMin: number; gapH: number; gapAuto: boolean; dropPct: number; tummyMin: number; mlPerKg: number; prepRoomMin: number; prepWarmMin: number;
 }
 
 export function autoGap(age: number | null): number {
@@ -30,6 +30,8 @@ export function thresholds(b: Baby | null): ResolvedThresholds {
     dropPct: t.dropPct || 30,
     tummyMin: t.tummyMin || 30,
     mlPerKg: t.mlPerKg || 150,
+    prepRoomMin: t.prepRoomMin || 60,
+    prepWarmMin: t.prepWarmMin || 30,
   };
 }
 
@@ -122,6 +124,15 @@ export function nextFeed(entries: Entry[], now = Date.now()): { at: number; gap:
   const avg = gaps.length >= 2 ? gaps.reduce((a, g) => a + g, 0) / gaps.length : 3 * H;
   const gap = Math.min(5 * H, Math.max(1.5 * H, avg));
   return { at: feeds[0].startedAt + gap, gap, last: feeds[0] };
+}
+
+/** Biberon préparé, pas encore donné. */
+export const isPrepared = (e: Entry): e is EntryOf<"bottle"> => e.type === "bottle" && e.inProgress;
+
+/** Heure limite pour donner un biberon préparé : 1 h à température ambiante, 30 min tiédi (réglables). */
+export function preparedDeadline(b: Baby | null, e: EntryOf<"bottle">): number {
+  const th = thresholds(b);
+  return e.startedAt + (e.data.warmed ? th.prepWarmMin : th.prepRoomMin) * 60_000;
 }
 
 export type AlertLevel = "urgent" | "attention" | "rappel" | "info";

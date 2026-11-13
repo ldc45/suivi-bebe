@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Baby } from "@/babies/types";
 import type { Entry } from "@/entries/types";
-import { computeAlerts, expectedWet, milkTarget, nextFeed, thresholds } from "./rules";
+import { computeAlerts, expectedWet, isPrepared, milkTarget, nextFeed, preparedDeadline, thresholds } from "./rules";
 import { H } from "./time";
 
 const NOW = new Date("2026-11-11T12:00:00").getTime();
@@ -64,5 +64,20 @@ describe("prochain repas", () => {
   });
   it("renvoie null sans aucun repas", () => {
     expect(nextFeed([], NOW)).toBeNull();
+  });
+});
+
+describe("biberon préparé", () => {
+  const prep = (warmed: boolean) => entry({ type: "bottle", data: { ml: 90, milk: "formula", warmed }, inProgress: true }, 0) as Extract<Entry, { type: "bottle" }>;
+  it("se donne dans l’heure à température ambiante, dans la demi-heure tiédi", () => {
+    expect(preparedDeadline(baby(), prep(false))).toBe(NOW + 60 * 60_000);
+    expect(preparedDeadline(baby(), prep(true))).toBe(NOW + 30 * 60_000);
+  });
+  it("suit les durées réglées", () => {
+    expect(preparedDeadline(baby({ settings: { thresholds: { prepRoomMin: 45 } } }), prep(false))).toBe(NOW + 45 * 60_000);
+  });
+  it("n’est pas compté comme un biberon bu", () => {
+    expect(isPrepared(prep(false))).toBe(true);
+    expect(isPrepared(entry({ type: "bottle", data: { ml: 90, milk: "formula" } }, 1))).toBe(false);
   });
 });

@@ -5,7 +5,7 @@ import { EntrySheet } from "@/entries/EntrySheet";
 import { ENTRY_META } from "@/entries/types";
 import { num } from "@/lib/format";
 import { computeAlerts, entriesOfDay, nextFeed, sumBottles, timeIn, visibleTypes } from "@/lib/rules";
-import { dayLabel, dayRange, daysEnding, dur, hm } from "@/lib/time";
+import { dayLabel, dayRange, daysEnding, dur, hm, MIN } from "@/lib/time";
 import { DayNav } from "@/ui/DayNav";
 import { useSheet } from "@/ui/Overlay";
 import { Legend, Timeline } from "@/ui/Timeline";
@@ -15,6 +15,7 @@ import { Icon } from "@/ui/Icon";
 import { Dial } from "./Dial";
 import { MedCards } from "./MedCards";
 import { OneTap } from "./OneTap";
+import { PreparedBottles } from "./PreparedBottles";
 
 export function AccueilPage() {
   const { baby, entries, viewDay, isToday, now } = useApp();
@@ -35,9 +36,9 @@ export function AccueilPage() {
     if (sleeping) { big = dur(now - sleeping.startedAt); cap = "de sommeil"; }
     else if (next) {
       // Heure estimée du prochain repas : le temps écoulé depuis le dernier est déjà dans la case sous les boutons rapides.
-      pre = `prochain ${next.last.type === "bottle" ? "biberon" : "repas"} vers`;
+      pre = `${next.last.type === "bottle" ? "biberon" : "repas"} vers`;
       big = hm(next.at);
-      cap = next.at > now ? `dans ${dur(next.at - now)}` : `prévu il y a ${dur(now - next.at)}`;
+      cap = next.at - now >= MIN ? `dans ${dur(next.at - now)}` : now - next.at >= MIN ? `il y a ${dur(now - next.at)}` : "maintenant";
     }
   } else {
     const feeds = day.filter((e) => e.type === "bottle" || e.type === "breastfeeding");
@@ -64,6 +65,7 @@ export function AccueilPage() {
   return (
     <>
       <DayNav />
+      {isToday && <PreparedBottles />}
       {running.map((e) => (
         <div key={e.id} className="sleepbar" style={{ "--c": ENTRY_META[e.type].color } as CSSProperties}>
           <div><b>{e.type === "sleep" ? "Sommeil en cours" : `${ENTRY_META[e.type].label} en cours`}</b><div className="small muted">depuis {hm(e.startedAt)}</div></div>

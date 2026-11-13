@@ -8,6 +8,8 @@ import { entriesOfDay, milkTarget, sumBottles, visibleTypes } from "@/lib/rules"
 import { dayLabel, daysEnding, dur, hm } from "@/lib/time";
 import { DayNav } from "@/ui/DayNav";
 import { useSheet } from "@/ui/Overlay";
+import { PrepareSheet } from "@/entries/PreparedSheets";
+import { PreparedBottles } from "../accueil/PreparedBottles";
 import { Evolution } from "../evolution/Evolution";
 
 const MILK_COLOR: Record<Milk, string> = { formula: ENTRY_META.bottle.color, breast: ENTRY_META.pumping.color, other: "#A79FBD" };
@@ -44,9 +46,11 @@ export function RepasPage() {
   return (
     <>
       <DayNav />
+      {isToday && bib && <PreparedBottles />}
       <div className="hero" style={{ "--c": ENTRY_META.bottle.color } as CSSProperties}>
         <div className="hl">{bib ? (isToday ? "Lait aujourd’hui" : `Lait, ${dayLabel(viewDay)}`) : (isToday ? "Repas aujourd’hui" : `Repas, ${dayLabel(viewDay)}`)}</div>
         <div className="hrow"><span className="num hbig">{bib ? `${num(ml)} ml` : tetees.length + solids.length}</span><button type="button" className="hbtn" onClick={openNew}>+ Repas</button></div>
+        {isToday && bib && <button type="button" className="link" style={{ color: "var(--text)", fontWeight: 600 }} onClick={() => sheet.open(<PrepareSheet />)}>Préparer un biberon à l’avance</button>}
         {extra.length > 0 && <div className="hs" style={{ color: "var(--text)" }}>{bib ? "Plus " : ""}{extra.join(" et ")}</div>}
         {bib && (target ? <>
           <div className="bar"><i style={{ width: `${Math.min(100, Math.round((ml / target.ml) * 100))}%` }} /></div>

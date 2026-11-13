@@ -6,7 +6,8 @@ import { ENTRY_META, type Entry, type EntryOf, MILK_LABEL } from "@/entries/type
 import { num } from "@/lib/format";
 import { visibleTypes } from "@/lib/rules";
 import { Icon } from "@/ui/Icon";
-import { useToast } from "@/ui/Overlay";
+import { useSheet, useToast } from "@/ui/Overlay";
+import { PrepareSheet } from "@/entries/PreparedSheets";
 
 /**
  * Saisie en un geste, sans formulaire : le même biberon que la dernière fois, ou une couche pipi.
@@ -16,6 +17,7 @@ export function OneTap() {
   const { baby, entries, isToday, userId } = useApp();
   const { save, remove } = useEntryMutations(baby?.id);
   const toast = useToast();
+  const sheet = useSheet();
   // Bloque le bouton un court instant après l’appui : évite un double enregistrement par double toucher.
   const [justDone, setJustDone] = useState<string | null>(null);
   useEffect(() => { if (!justDone) return; const t = window.setTimeout(() => setJustDone(null), 1500); return () => window.clearTimeout(t); }, [justDone]);
@@ -44,8 +46,10 @@ export function OneTap() {
     });
   }
   if (!actions.length) return null;
+  const canPrepare = vis.includes("bottle");
 
   return (
+    <>
     <div className="onetap" role="group" aria-label="Enregistrer maintenant, en un geste">
       {actions.map((a) => (
         <button key={a.key} type="button" style={{ "--c": a.color } as CSSProperties} disabled={justDone === a.key} onClick={() => { setJustDone(a.key); a.run(); }}>
@@ -54,5 +58,9 @@ export function OneTap() {
         </button>
       ))}
     </div>
+    {canPrepare && <button type="button" className="prepbtn" style={{ "--c": ENTRY_META.bottle.color } as CSSProperties} onClick={() => sheet.open(<PrepareSheet />)}>
+      <Icon name="clock" />Préparer un biberon à l’avance
+    </button>}
+    </>
   );
 }
