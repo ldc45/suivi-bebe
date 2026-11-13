@@ -1,7 +1,11 @@
 import { createContext, type CSSProperties, type ReactNode, type TouchEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 /* ---------- Feuille du bas ---------- */
-interface SheetApi { open: (node: ReactNode) => void; close: () => void }
+interface SheetApi {
+  open: (node: ReactNode) => void;
+  /** Ferme la feuille ; `after` s’exécute une fois l’historique revenu en place (utile pour naviguer ensuite). */
+  close: (after?: () => void) => void;
+}
 const SheetCtx = createContext<SheetApi | null>(null);
 export const useSheet = () => useContext(SheetCtx)!;
 
@@ -18,10 +22,15 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
   // au lieu de quitter la page.
   const pushed = useRef(false);
   const skipPop = useRef(false);
+  const afterClose = useRef<(() => void) | null>(null);
 
-  const close = useCallback(() => {
+  const close = useCallback((after?: () => void) => {
     setNode(null);
-    if (pushed.current) { pushed.current = false; skipPop.current = true; history.back(); }
+    if (pushed.current) {
+      // history.back() est asynchrone : une navigation lancée tout de suite serait annulée par ce retour.
+      pushed.current = false; skipPop.current = true; afterClose.current = after ?? null;
+      history.back();
+    } else after?.();
   }, []);
   const open = useCallback((n: ReactNode) => {
     if (!pushed.current) { history.pushState({ ...history.state, sheet: true }, ""); pushed.current = true; }
@@ -31,7 +40,11 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const onPop = () => {
-      if (skipPop.current) { skipPop.current = false; return; }
+      if (skipPop.current) {
+        skipPop.current = false;
+        const after = afterClose.current; afterClose.current = null; after?.();
+        return;
+      }
       if (pushed.current) { pushed.current = false; setNode(null); }
     };
     window.addEventListener("popstate", onPop);
@@ -82,7 +95,7 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
         {children}
         {node && (
           <>
-            <div className="sheet-bg" onClick={close} />
+            <div className="sheet-bg" onClick={() => close()} />
             <div className="sheet" role="dialog" aria-modal="true" ref={sheetRef} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} onTouchCancel={onTouchEnd}>
               <div className="grab" />
               {node}

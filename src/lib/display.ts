@@ -6,7 +6,7 @@
 import { useSyncExternalStore } from "react";
 
 export type Theme = "auto" | "light" | "dark";
-export interface DisplayPrefs {
+interface DisplayPrefs {
   theme: Theme;
   /** Mode nuit automatique entre NIGHT_FROM et NIGHT_TO. */
   autoNight: boolean;
@@ -35,7 +35,7 @@ function nextMorning(now: number) {
   return d.getTime();
 }
 
-export function isNight(p = prefs, now = Date.now()) {
+function isNight(p = prefs, now = Date.now()) {
   if (p.nightUntil && now < p.nightUntil) return true;
   return p.autoNight && inNightHours(now) && !(p.offUntil && now < p.offUntil);
 }

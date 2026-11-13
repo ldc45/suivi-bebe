@@ -290,7 +290,7 @@ export function EntrySheet({ type, entry: given, initialTs }: Props) {
       title={editing ? "Modifier" : isFeedNew ? "Repas" : meta.label}
       icon={<Icon name={isFeedNew ? "solid" : type} />}
       color={meta.color}
-      onClose={sheet.close}
+      onClose={() => sheet.close()}
       footer={footer}
     >
       {isFeedNew && (

@@ -45,19 +45,19 @@ export function OneTap() {
       run: () => record({ ...base(), type: "diaper", data: { pee: true, poo: false } }, "Couche pipi enregistrée"),
     });
   }
-  if (!actions.length) return null;
   const canPrepare = vis.includes("bottle");
+  if (!actions.length && !canPrepare) return null;
 
   return (
     <>
-    <div className="onetap" role="group" aria-label="Enregistrer maintenant, en un geste">
+    {actions.length > 0 && <div className="onetap" role="group" aria-label="Enregistrer maintenant, en un geste">
       {actions.map((a) => (
         <button key={a.key} type="button" style={{ "--c": a.color } as CSSProperties} disabled={justDone === a.key} onClick={() => { setJustDone(a.key); a.run(); }}>
           <span className="lic"><Icon name={a.icon} /></span>
           <span className="lt"><b>{a.label}</b><span>{a.detail}</span></span>
         </button>
       ))}
-    </div>
+    </div>}
     {canPrepare && <button type="button" className="prepbtn" style={{ "--c": ENTRY_META.bottle.color } as CSSProperties} onClick={() => sheet.open(<PrepareSheet />)}>
       <Icon name="clock" />Préparer un biberon à l’avance
     </button>}

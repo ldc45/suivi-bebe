@@ -23,7 +23,7 @@ export function Timeline({ days, entries, types, now }: { days: string[]; entrie
                 if (!overlap(a, b, d0, d1)) return null;
                 const x1 = Math.max(a, d0) - d0, x2 = Math.min(b, d1) - d0;
                 return <i key={e.id} className={point ? "pt" : "bd"} title={`${ENTRY_META[e.type].label} ${hm(e.startedAt)} : ${describe(e, now)}`}
-                  style={{ left: pct(x1), width: pct(x2 - x1), "--c": lookOf(e).color, background: lookBackground(lookOf(e)) } as CSSProperties} />;
+                  style={{ left: pct(x1), width: pct(x2 - x1), background: lookBackground(lookOf(e)) }} />;
               })}
             </span>
           </div>

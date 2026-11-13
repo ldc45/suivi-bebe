@@ -2,7 +2,7 @@
 
 Application de suivi du quotidien d’un nourrisson (repas, sommeil, couches, traitements, croissance), partagée en temps réel entre les parents.
 
-**Stack** : Vite, React 18, TypeScript, TanStack Query, Supabase (Postgres, authentification par code e-mail, temps réel), Chart.js, PWA. Déploiement sur Netlify.
+**Stack** : Vite, React 18, TypeScript, TanStack Query, Supabase (Postgres, authentification par e-mail et mot de passe, temps réel), Chart.js, PWA hors ligne. Déploiement sur Netlify.
 
 ---
 
@@ -23,8 +23,6 @@ npm run dev                     # http://localhost:5173
 | `npm test` | Tests unitaires (Vitest) des règles métier |
 | `npm run db:types` | Génère les types de la base (nécessite la CLI Supabase liée au projet) |
 
-> Le projet a été généré sans pouvoir lancer `npm install` dans l’environnement de génération. Le code a été vérifié avec le compilateur TypeScript et testé dans un navigateur, mais contre des versions simplifiées des bibliothèques. Lancez `npm run typecheck` et `npm test` après la première installation : les éventuels écarts de typage avec les versions réelles se corrigent rapidement.
-
 ---
 
 ## Mise en place
@@ -35,14 +33,7 @@ npm run dev                     # http://localhost:5173
 2. **Schéma** : dans *SQL Editor*, exécutez `supabase/migrations/20261111000000_init.sql`.
    Avec la CLI : `supabase link --project-ref <ref>` puis `supabase db push`.
 3. **Données de départ** : exécutez `supabase/seed/lei.sql` (fourni à part, jamais versionné) après y avoir remplacé les deux adresses e-mail.
-4. **Connexion par code** : *Authentication > Emails*, modèles **Magic Link** et **Confirm signup**. Remplacez le corps par :
-
-   ```html
-   <h2>Votre code Suivi bébé</h2>
-   <p>Code de connexion : <strong>{{ .Token }}</strong></p>
-   ```
-
-   Le code à 6 chiffres fonctionne aussi dans l’appli installée sur l’écran d’accueil, contrairement à un lien magique qui s’ouvrirait dans le navigateur.
+4. **Connexion** : *Authentication > Sign In / Providers > Email*, option **Confirm email** désactivée (la version gratuite ne permet plus de personnaliser les e-mails sans serveur d’envoi). Chaque parent crée son mot de passe à la première connexion. Une fois les comptes créés, désactivez **Allow new users to sign up** : plus personne ne peut créer de compte depuis l’appli.
 5. Récupérez **Project URL** et la clé **anon public** (*Project Settings > API*).
 
 ### 2. Icônes
@@ -69,11 +60,14 @@ Ouvrez l’adresse Netlify, connectez-vous avec votre e-mail, puis *Partager > S
 src/
   app/            App (garde d’authentification), AppContext (enfant et jour affichés), Shell (en-tête, routes, barre)
   babies/         Profils et traitements : types, accès aux données, formulaire, sélecteur d’enfant
-  entries/        Saisies : types du domaine, description, accès aux données, fenêtre de saisie, bouton +
+  entries/        Saisies : types du domaine, apparence (couleurs, pictogrammes), description, accès aux données
+                  (envoi hors ligne), fenêtres de saisie, biberon préparé, bouton +
   features/       Un dossier par écran : accueil, repas, sommeil, couches, mesures, tummy, journal, reglages, auth
     evolution/    Graphiques par type d’activité, réutilisés dans chaque onglet
-  lib/            Fonctions pures et services : dates, règles métier (alertes, repères), normes OMS, Supabase, temps réel
-  ui/             Composants partagés : feuilles, messages, contrôles, navigation par jour, frise, icônes
+  lib/            Fonctions pures et services : dates, règles métier (alertes, repères, prochain repas, biberon préparé),
+                  normes OMS, affichage (thème, mode nuit), messages d’envoi, Supabase, temps réel
+  ui/             Composants partagés : feuilles (geste retour, glisser pour fermer), messages, état hors ligne,
+                  contrôles, navigation par jour, frise, icônes
   styles/         base (thème, navigation), screens (écrans), forms (saisie, réglages), data (graphiques, journal)
 supabase/
   migrations/     Schéma versionné et règles d’accès (RLS)
@@ -93,8 +87,10 @@ Les règles RLS limitent chaque table aux membres du foyer, identifiés par l’
 
 ### Flux de données
 
-- `useEntries` charge les saisies des 180 derniers jours de l’enfant affiché, en une seule requête partagée par tous les écrans.
-- Les mutations (`useEntryMutations`) sont **optimistes** : l’écran se met à jour avant la réponse du serveur, et revient en arrière en cas d’échec. Les identifiants sont générés côté client, ce qui rend l’annulation triviale.
+- `useEntries` charge les saisies des 180 derniers jours de l’enfant affiché (plus tout l’historique des pesées et des repas solides), en une seule requête partagée par tous les écrans.
+- Un biberon **préparé** est une saisie `bottle` avec `in_progress = true` : `AppContext` le tient à part (`prepared`), il n’est compté nulle part avant d’être donné.
+- Les mutations (`useEntryMutations`) sont **optimistes** : l’écran se met à jour avant la réponse du serveur, et revient en arrière si le serveur refuse. Les identifiants sont générés côté client, ce qui rend l’annulation triviale.
+- **Hors ligne** : le cache et les saisies en attente sont gardés sur le téléphone (`PersistQueryClientProvider`, `main.tsx`). Les fonctions d’envoi sont enregistrées une fois (`registerEntryMutations`) pour reprendre après un redémarrage ; les envois passent un par un, dans l’ordre.
 - `useRealtime` écoute Supabase et **invalide** les requêtes concernées quand l’autre parent enregistre quelque chose.
 - Les règles métier (`lib/rules.ts`) sont des fonctions pures, testées dans `lib/rules.test.ts`.
 
@@ -109,7 +105,8 @@ Les règles RLS limitent chaque table aux membres du foyer, identifiés par l’
 
 ## Pistes
 
-- Persistance du cache TanStack Query pour un mode hors ligne complet.
-- Notifications pour les traitements (Web Push).
+- Résumé « Pendant votre absence » pour le parent qui se lève.
+- Notifications entre parents et rappels de traitements (Web Push, Edge Function Supabase).
+- Chrono de tétée avec bascule gauche / droite.
 - Export PDF pour les rendez-vous chez le pédiatre.
 - Pagination du journal au-delà de 180 jours.

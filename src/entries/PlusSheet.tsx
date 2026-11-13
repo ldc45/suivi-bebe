@@ -25,7 +25,7 @@ export function PlusSheet() {
     items.push({ key: t, type: t, icon: t, label: ENTRY_META[t].short, color: ENTRY_META[t].color });
   }
   return (
-    <SheetLayout title="Ajouter" onClose={sheet.close}>
+    <SheetLayout title="Ajouter" onClose={() => sheet.close()}>
       <div className="quick">
         {items.map((it) => (
           <button key={it.key} type="button" className="qa" style={{ "--c": it.color } as CSSProperties} onClick={() => sheet.open(<EntrySheet key={it.key} type={it.type} />)}>

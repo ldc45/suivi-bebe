@@ -2,6 +2,7 @@ import { type CSSProperties, type ReactNode, useState } from "react";
 import { Bar, Doughnut, Line } from "react-chartjs-2";
 import { useApp } from "@/app/AppContext";
 import { interval } from "@/entries/describe";
+import { PEE_COLOR, POO_COLOR } from "@/entries/look";
 import { ENTRY_META, type EntryOf, type EntryType, REACTION_LABEL, STOOL, TEXTURE_LABEL } from "@/entries/types";
 import { cssVar, num } from "@/lib/format";
 import { entriesOfDay, milkTarget, sleepOfDay, sumBottles, thresholds } from "@/lib/rules";
@@ -104,7 +105,7 @@ export function Charts({ type, range }: { type: EntryType; range: number }) {
       return <>
         <Kpis items={[[num(avg(wet), 1), "mouillées par jour"], [num(avg(poo), 1), "selles par jour"], [String(flat.length), "couches"]]} />
         <ChartBox title="Pipi et selles par jour">
-          <Bar options={baseOptions()} data={{ labels, datasets: [{ label: "Mouillées (pipi)", data: wet, backgroundColor: "#E3C34A", borderRadius: 4 }, { label: "Selles (caca)", data: poo, backgroundColor: C, borderRadius: 4 }] }} />
+          <Bar options={baseOptions()} data={{ labels, datasets: [{ label: "Mouillées (pipi)", data: wet, backgroundColor: PEE_COLOR, borderRadius: 4 }, { label: "Selles (caca)", data: poo, backgroundColor: POO_COLOR, borderRadius: 4 }] }} />
         </ChartBox>
         <div className="chart"><h4>Couleur des selles</h4>
           <div className="frise">{[...days].reverse().map((k) => {

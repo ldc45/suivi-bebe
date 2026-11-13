@@ -16,7 +16,7 @@ export function BabySwitcher() {
   const sheet = useSheet();
   const toast = useToast();
   return (
-    <SheetLayout title="Enfants suivis" onClose={sheet.close}
+    <SheetLayout title="Enfants suivis" onClose={() => sheet.close()}
       footer={<button className="btn wide" type="button" onClick={() => sheet.open(<NewBabySheet />)}>+ Ajouter un enfant</button>}>
       {babies.map((b, i) => (
         <button key={b.id} type="button" className="bsel" aria-current={b.id === baby?.id} onClick={() => {
@@ -32,7 +32,7 @@ export function BabySwitcher() {
   );
 }
 
-export function NewBabySheet() {
+function NewBabySheet() {
   const { householdId, selectBaby } = useApp();
   const sheet = useSheet();
   const toast = useToast();
@@ -47,7 +47,7 @@ export function NewBabySheet() {
     });
   };
   return (
-    <SheetLayout title="Ajouter un enfant" onClose={sheet.close}
+    <SheetLayout title="Ajouter un enfant" onClose={() => sheet.close()}
       footer={<button className="btn primary wide" type="button" disabled={create.isPending} onClick={submit}>Créer le profil</button>}>
       {fields}
     </SheetLayout>

@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { useApp } from "@/app/AppContext";
 import { WINDOW_DAYS } from "@/entries/api";
 import { LogList } from "@/entries/rows";
@@ -15,13 +16,14 @@ const STATUS_TEXT = {
 function DaySheet({ k }: { k: string }) {
   const { baby, entries, now, setViewDay } = useApp();
   const sheet = useSheet();
+  const navigate = useNavigate();
   if (!baby) return null;
   const info = dayStatus(baby, entries, k, now);
   const [s0, s1] = dayRange(k);
   const dia = entriesOfDay(entries, k).filter((e) => e.type === "diaper");
   return (
-    <SheetLayout title={dayLabel(k)} onClose={sheet.close}
-      footer={<button type="button" className="btn wide" onClick={() => { setViewDay(k); sheet.close(); window.scrollTo(0, 0); }}>Afficher ce jour dans l’appli</button>}>
+    <SheetLayout title={dayLabel(k)} onClose={() => sheet.close()}
+      footer={<button type="button" className="btn wide" onClick={() => sheet.close(() => { setViewDay(k); navigate("/"); window.scrollTo(0, 0); })}>Afficher ce jour sur l’accueil</button>}>
       <div className="daystats" style={{ justifyContent: "flex-start", marginBottom: 12 }}>
         <div><span className="num">{num(info.ml)} ml</span><span>de lait</span></div>
         <div><span className="num">{info.feeds}</span><span>repas</span></div>

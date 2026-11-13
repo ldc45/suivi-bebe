@@ -13,7 +13,7 @@ function author(e: Entry, userId: string) {
 }
 
 /** Ligne avec pictogramme, utilisée dans les listes des onglets. */
-export function LogRow({ entry: e, withDay }: { entry: Entry; withDay?: boolean }) {
+function LogRow({ entry: e, withDay }: { entry: Entry; withDay?: boolean }) {
   const { userId, now } = useApp();
   const sheet = useSheet();
   const meta = ENTRY_META[e.type], look = lookOf(e);

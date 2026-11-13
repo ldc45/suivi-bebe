@@ -38,7 +38,7 @@ export function PrepareSheet() {
   };
 
   return (
-    <SheetLayout title="Biberon préparé" icon={<Icon name="bottle" />} color={ENTRY_META.bottle.color} onClose={sheet.close}
+    <SheetLayout title="Biberon préparé" icon={<Icon name="bottle" />} color={ENTRY_META.bottle.color} onClose={() => sheet.close()}
       footer={<button className="btn primary wide" type="button" onClick={submit}>C’est prêt</button>}>
       <div className="grp"><Stepper value={ml} onChange={setMl} step={10} unit="millilitres préparés" /></div>
       <Field label="Contenu"><Chips name="milk" options={MILK_LABEL} value={milk} onChange={setMilk} /></Field>
@@ -67,7 +67,7 @@ export function GiveSheet({ entry }: { entry: EntryOf<"bottle"> }) {
   };
 
   return (
-    <SheetLayout title="Biberon donné" icon={<Icon name="bottle" />} color={ENTRY_META.bottle.color} onClose={sheet.close}
+    <SheetLayout title="Biberon donné" icon={<Icon name="bottle" />} color={ENTRY_META.bottle.color} onClose={() => sheet.close()}
       footer={<button className="btn primary wide" type="button" onClick={submit}>Enregistrer</button>}>
       <p className="muted" style={{ marginTop: 0 }}>Préparé à {hm(entry.startedAt)} : {num(entry.data.ml)} ml. Quelle quantité a été bue ?</p>
       <div className="grp"><Stepper value={ml} onChange={setMl} step={10} unit="millilitres bus" /></div>

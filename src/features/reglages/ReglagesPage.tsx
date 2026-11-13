@@ -22,7 +22,7 @@ function ProfileSection() {
   const save = () => {
     const r = read();
     if (typeof r === "string") return toast(r);
-    update.mutate(r, { onSuccess: () => toast("Profil enregistré"), onError: () => toast("Enregistrement impossible.") });
+    update.mutate(r, { onSuccess: () => toast("Profil enregistré") });
   };
   return <div className="panel">{fields}<button type="button" className="btn primary wide block" onClick={save}>Enregistrer le profil</button></div>;
 }

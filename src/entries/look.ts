@@ -5,8 +5,8 @@ import { ENTRY_META, type Entry, type EntryOf } from "./types";
 export const PEE_COLOR = "#E3C34A";
 export const POO_COLOR = "#A8693A";
 
-export type DiaperKind = "pee" | "poo" | "both";
-export const diaperKindOf = (e: EntryOf<"diaper">): DiaperKind => (e.data.pee && e.data.poo ? "both" : e.data.poo ? "poo" : "pee");
+type DiaperKind = "pee" | "poo" | "both";
+const diaperKindOf = (e: EntryOf<"diaper">): DiaperKind => (e.data.pee && e.data.poo ? "both" : e.data.poo ? "poo" : "pee");
 
 /** Apparence d’une saisie : couleur principale, seconde couleur (pipi et caca), pictogramme. */
 export interface Look { color: string; color2?: string; icon: IconName }

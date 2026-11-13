@@ -4,7 +4,7 @@ export const MIN = 60_000;
 export const H = 3_600_000;
 export const DAY = 86_400_000;
 
-export const DOW = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
+const DOW = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
 export const MON = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
 
 export const pad = (n: number) => String(n).padStart(2, "0");

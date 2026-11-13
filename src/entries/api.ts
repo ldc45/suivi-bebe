@@ -67,8 +67,8 @@ const sortDesc = (list: Entry[]) => [...list].sort((a, b) => b.startedAt - a.sta
 
 /* ---------- Envoi des saisies, y compris hors ligne ---------- */
 
-export const SAVE_KEY = ["entries", "save"] as const;
-export const REMOVE_KEY = ["entries", "remove"] as const;
+const SAVE_KEY = ["entries", "save"] as const;
+const REMOVE_KEY = ["entries", "remove"] as const;
 
 /** Échec réseau (pas de réponse du serveur), par opposition à un refus du serveur. */
 export function isNetworkError(err: unknown): boolean {

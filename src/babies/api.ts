@@ -19,6 +19,9 @@ const toMedication = (r: MedicationRow): Medication => ({
   timeOfDay: r.time_of_day ? r.time_of_day.slice(0, 5) : null, active: r.active,
 });
 
+/** Clé des modifications de réglages (profil, traitements) : un échec est signalé par un message (voir main.tsx). */
+export const SETTINGS_KEY = ["settings"] as const;
+
 export const keys = {
   household: ["household"] as const,
   babies: (householdId: string | undefined) => ["babies", householdId] as const,
@@ -70,12 +73,13 @@ export function useCreateBaby(householdId: string | undefined) {
   });
 }
 
-export type BabyPatch = Partial<BabyInput> & { settings?: BabySettings };
+type BabyPatch = Partial<BabyInput> & { settings?: BabySettings };
 
 export function useUpdateBaby(baby: Baby | null) {
   const qc = useQueryClient();
   const key = keys.babies(baby?.householdId);
   return useMutation({
+    mutationKey: SETTINGS_KEY,
     mutationFn: async (p: BabyPatch) => {
       const row: Record<string, unknown> = {};
       if (p.name !== undefined) row.name = p.name;
@@ -114,6 +118,7 @@ export function useMedicationMutations(babyId: string | undefined) {
   const qc = useQueryClient();
   const invalidate = () => qc.invalidateQueries({ queryKey: keys.medications(babyId) });
   const save = useMutation({
+    mutationKey: SETTINGS_KEY,
     mutationFn: async (m: Omit<Medication, "id" | "babyId"> & { id?: string }) => {
       const row = { baby_id: babyId, name: m.name, dose: m.dose, frequency: m.frequency, time_of_day: m.timeOfDay, active: m.active };
       const { error } = m.id
@@ -124,6 +129,7 @@ export function useMedicationMutations(babyId: string | undefined) {
     onSettled: invalidate,
   });
   const remove = useMutation({
+    mutationKey: SETTINGS_KEY,
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("medications").delete().eq("id", id);
       if (error) throw error;
