@@ -8,7 +8,6 @@ import { computeAlerts, entriesOfDay, nextFeed, sumBottles, timeIn, visibleTypes
 import { dayLabel, dayRange, daysEnding, dur, hm, MIN } from "@/lib/time";
 import { DayNav } from "@/ui/DayNav";
 import { useSheet } from "@/ui/Overlay";
-import { Legend, Timeline } from "@/ui/Timeline";
 import { diaperKind } from "@/entries/describe";
 import { type Look, lookBackground, lookOf } from "@/entries/look";
 import { Icon } from "@/ui/Icon";
@@ -16,6 +15,7 @@ import { Dial } from "./Dial";
 import { MedCards } from "./MedCards";
 import { OneTap } from "./OneTap";
 import { PreparedBottles } from "./PreparedBottles";
+import { WeekRhythm } from "./WeekRhythm";
 
 export function AccueilPage() {
   const { baby, entries, viewDay, isToday, now } = useApp();
@@ -94,7 +94,7 @@ export function AccueilPage() {
         </div>
       )}
       <h2 className="sec">Rythme des 7 derniers jours</h2>
-      <div className="card"><Timeline days={daysEnding(viewDay, 7)} entries={entries} types={timelineTypes} now={now} /><Legend types={timelineTypes} /></div>
+      <div className="card"><WeekRhythm days={daysEnding(viewDay, 7)} entries={entries} types={timelineTypes} now={now} /></div>
       <h2 className="sec">{isToday ? "Aujourd’hui" : dayLabel(viewDay)}</h2>
       {day.length
         ? <ul className="tlist">{day.map((e) => <TimeRow key={e.id} entry={e} />)}</ul>

@@ -1,6 +1,5 @@
-import type { CSSProperties } from "react";
 import { describe, interval } from "@/entries/describe";
-import { lookBackground, lookOf, PEE_COLOR, POO_COLOR } from "@/entries/look";
+import { lookBackground, lookOf } from "@/entries/look";
 import { ENTRY_META, type Entry, type EntryType } from "@/entries/types";
 import { dayLabel, dayRange, H, hm, MIN, overlap } from "@/lib/time";
 
@@ -32,10 +31,4 @@ export function Timeline({ days, entries, types, now }: { days: string[]; entrie
       <div className="tl-r tl-ax"><span className="tl-d" /><span className="tl-t">{[0, 6, 12, 18, 24].map((h) => <b key={h} style={{ left: `${(h / 24) * 100}%` }}>{h} h</b>)}</span></div>
     </div>
   );
-}
-
-export function Legend({ types }: { types: EntryType[] }) {
-  // Les couches sont détaillées : pipi et caca ont chacun leur couleur.
-  const items = types.flatMap((t): [string, string][] => (t === "diaper" ? [["Pipi", PEE_COLOR], ["Caca", POO_COLOR]] : [[ENTRY_META[t].label, ENTRY_META[t].color]]));
-  return <div className="legend">{items.map(([l, c]) => <span key={l}><i style={{ "--c": c } as CSSProperties} />{l}</span>)}</div>;
 }
