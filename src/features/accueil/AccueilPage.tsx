@@ -5,7 +5,7 @@ import { EntrySheet } from "@/entries/EntrySheet";
 import { ENTRY_META } from "@/entries/types";
 import { num } from "@/lib/format";
 import { computeAlerts, entriesOfDay, nextFeed, sumBottles, timeIn, visibleTypes } from "@/lib/rules";
-import { dayLabel, dayRange, daysEnding, dur, hm, MIN } from "@/lib/time";
+import { dayLabel, dayRange, dur, hm, MIN } from "@/lib/time";
 import { DayNav } from "@/ui/DayNav";
 import { useSheet } from "@/ui/Overlay";
 import { diaperKind } from "@/entries/describe";
@@ -15,7 +15,7 @@ import { Dial } from "./Dial";
 import { MedCards } from "./MedCards";
 import { OneTap } from "./OneTap";
 import { PreparedBottles } from "./PreparedBottles";
-import { WeekRhythm } from "./WeekRhythm";
+import { WeekTrends } from "./WeekTrends";
 
 export function AccueilPage() {
   const { baby, entries, viewDay, isToday, now } = useApp();
@@ -60,7 +60,6 @@ export function AccueilPage() {
   if (vis.includes("sleep")) stats.push([dur(timeIn(entries, "sleep", s0, s1, now)), "de sommeil"]);
 
   const alerts = isToday ? computeAlerts(baby, entries, now) : [];
-  const timelineTypes = vis.filter((t) => t !== "growth");
 
   return (
     <>
@@ -93,8 +92,7 @@ export function AccueilPage() {
           <p className="disclaimer">Repères indicatifs selon l’âge de {baby.name}. Ils ne remplacent pas un avis médical. Urgence : 15 ou 112.</p>
         </div>
       )}
-      <h2 className="sec">Rythme des 7 derniers jours</h2>
-      <div className="card"><WeekRhythm days={daysEnding(viewDay, 7)} entries={entries} types={timelineTypes} now={now} /></div>
+      <WeekTrends types={vis} />
       <h2 className="sec">{isToday ? "Aujourd’hui" : dayLabel(viewDay)}</h2>
       {day.length
         ? <ul className="tlist">{day.map((e) => <TimeRow key={e.id} entry={e} />)}</ul>
