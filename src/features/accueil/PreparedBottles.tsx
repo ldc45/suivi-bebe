@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useApp } from "@/app/AppContext";
 import { useEntryMutations } from "@/entries/api";
-import { GiveSheet } from "@/entries/PreparedSheets";
+import { GiveSheet, PrepareSheet } from "@/entries/PreparedSheets";
 import { num } from "@/lib/format";
 import { preparedDeadline } from "@/lib/rules";
 import { dur, hm, MIN } from "@/lib/time";
@@ -42,6 +42,7 @@ export function PreparedBottles() {
             {state !== "expired" && <span className="num left">{dur(left)}</span>}
             <div className="pa">
               {state !== "expired" && <button type="button" className="btn primary" onClick={() => sheet.open(<GiveSheet entry={e} />)}>Donné</button>}
+              <button type="button" className="btn" onClick={() => sheet.open(<PrepareSheet entry={e} />)}>Modifier</button>
               <button type="button" className={`btn${state === "expired" ? " primary" : ""}`} onClick={() => { remove.mutate(e.id); toast("Biberon jeté", () => save.mutate(e)); }}>Jeté</button>
             </div>
           </div>

@@ -123,6 +123,7 @@
 .prepbar .pt span{ font-size:.9rem; color:var(--muted); }
 .prepbar .left{ font-size:1.5rem; white-space:nowrap; }
 .prepbar .pa{ grid-column:1 / -1; display:flex; gap:8px; }
-.prepbar .pa .btn{ flex:1; }
+.prepbar .pa .btn{ flex:1; padding-left:10px; padding-right:10px; }
+.prepbar .pa .btn.primary{ flex:1.5; }
 .prepbtn{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; min-height:48px; margin-top:10px; border:1px dashed color-mix(in srgb, var(--c) 60%, var(--line)); border-radius:14px; background:none; font-weight:600; color:var(--text); }
 .prepbtn .ico{ --c:var(--c); width:20px; height:20px; }
