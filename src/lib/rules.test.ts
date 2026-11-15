@@ -15,8 +15,8 @@ const entry = (e: Partial<Entry> & Pick<Entry, "type" | "data">, hoursAgo: numbe
 
 describe("seuils", () => {
   it("adapte l’intervalle entre repas à l’âge", () => {
-    expect(thresholds(baby()).gapH).toBe(4);
-    expect(thresholds(baby({ birthDate: "2026-07-01" })).gapH).toBe(0);
+    expect(thresholds(baby(), NOW).gapH).toBe(4);
+    expect(thresholds(baby({ birthDate: "2026-07-01" }), NOW).gapH).toBe(0);
   });
   it("suit l’âge en jours pour les couches avant 5 jours", () => {
     expect(expectedWet(baby({ birthDate: "2026-11-09" }), NOW)).toBe(3);
@@ -26,11 +26,11 @@ describe("seuils", () => {
 
 describe("repère de lait", () => {
   it("n’existe pas avant 7 jours", () => {
-    expect(milkTarget(baby({ birthDate: "2026-11-08" }), [])).toBeNull();
+    expect(milkTarget(baby({ birthDate: "2026-11-08" }), [], NOW)).toBeNull();
   });
   it("utilise le dernier poids connu", () => {
     const w = entry({ type: "growth", data: { weight_g: 3600 } }, 2);
-    expect(milkTarget(baby(), [w])?.ml).toBe(540);
+    expect(milkTarget(baby(), [w], NOW)?.ml).toBe(540);
   });
 });
 

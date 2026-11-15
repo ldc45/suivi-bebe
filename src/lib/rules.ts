@@ -18,9 +18,9 @@ export function autoGap(age: number | null): number {
   return 0;
 }
 
-export function thresholds(b: Baby | null): ResolvedThresholds {
+export function thresholds(b: Baby | null, at = Date.now()): ResolvedThresholds {
   const t = b?.settings.thresholds ?? {};
-  const age = ageDays(b?.birthDate);
+  const age = ageDays(b?.birthDate, at);
   const gapSet = typeof t.gapH === "number";
   return {
     fever: t.fever || 38,
@@ -59,8 +59,8 @@ export function lengths(b: Baby, entries: Entry[]): GrowthPoint[] {
 }
 
 /** Repère quotidien de lait en ml, à partir de 7 jours et d’un poids connu. */
-export function milkTarget(b: Baby, entries: Entry[]): { ml: number; kg: number } | null {
-  const w = weights(b, entries), age = ageDays(b.birthDate);
+export function milkTarget(b: Baby, entries: Entry[], now = Date.now()): { ml: number; kg: number } | null {
+  const w = weights(b, entries), age = ageDays(b.birthDate, now);
   if (!w.length || age == null || age < 7) return null;
   const kg = w[w.length - 1].value;
   return { ml: Math.round((kg * thresholds(b).mlPerKg) / 10) * 10, kg };
