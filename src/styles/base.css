@@ -114,4 +114,9 @@ nav.tabs a[aria-current="page"] .ico{ --c:var(--moon); }
 .onboard{ padding-top:24px; }
 .onboard h1{ font-family:var(--serif); font-variation-settings:"SOFT" 100; font-size:2.2rem; font-weight:600; letter-spacing:-0.02em; line-height:1.1; margin:0 0 10px; }
 .onboard p{ color:var(--muted); margin:0 0 26px; }
+/* Retour à l’appui : léger enfoncement, rapide (100 à 160 ms), sur tout ce qui se touche comme un bouton. */
+:is(.btn, .hbtn, .mbtn, .gear, .dbtn, .who, .bsel, .onetap button, .prepbtn, .since button, .trend, .pills button, .timechips button, .chip span, .wd){ transition:transform 160ms var(--ease-out); }
+:is(.btn, .hbtn, .mbtn, .gear, .dbtn, .who, .bsel, .onetap button, .prepbtn, .since button, .trend, .pills button, .timechips button, .wd):active:not(:disabled){ transform:scale(.97); }
+.chip:active span{ transform:scale(.96); }
+.plusbtn span{ transition:transform 160ms var(--ease-out); } .plusbtn:active span{ transform:scale(.92); }
 @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
