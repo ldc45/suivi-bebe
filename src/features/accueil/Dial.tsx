@@ -14,30 +14,22 @@ import { dayRange, hm, MIN, todayKey } from "@/lib/time";
 const C = 160, RS = 147, WS = 16, RF = 116, WF = 28, RC = 82, WC = 24;
 const ICON_F = 13, ICON_C = 11, ICON_S = 11;
 
-interface Placed { key: string; e: Entry; a: number; r: number; z: number }
+interface Placed { key: string; e: Entry; a: number; r: number; z: number; /** Saisies regroupées sous ce pictogramme. */ more?: Entry[] }
 
 /**
- * Écarte les pictogrammes d’un même anneau qui se chevauchent (ex. vitamine D et couche à la même heure) :
- * chaque groupe trop serré est réparti autour de sa position moyenne. L’heure exacte reste dans l’infobulle.
+ * Évite que les pictogrammes d’un même anneau se recouvrent (ex. vitamine D et couche à la même heure).
+ * Un pictogramme peut être décalé d’au plus un demi-pictogramme par rapport à son heure ; au-delà, il est
+ * regroupé avec le précédent, qui affiche alors un compteur. Ainsi, même une journée très chargée ne place
+ * jamais un pictogramme loin de sa vraie heure.
  */
 function spread(items: Placed[]): Placed[] {
-  const sorted = [...items].sort((x, y) => x.a - y.a);
   const out: Placed[] = [];
-  let group: Placed[] = [];
-  const flush = () => {
-    if (!group.length) return;
-    const step = (2 * group[0].z + 3) / group[0].r;
-    const mid = group.reduce((s, p) => s + p.a, 0) / group.length;
-    group.forEach((p, i) => out.push({ ...p, a: mid + (i - (group.length - 1) / 2) * step }));
-    group = [];
-  };
-  for (const p of sorted) {
-    const last = group[group.length - 1];
-    // Trop proche du précédent : même groupe (une suite d’activités rapprochées forme un seul groupe).
-    if (last && p.a - last.a < (2 * p.z + 3) / p.r) group.push(p);
-    else { flush(); group.push(p); }
+  for (const p of [...items].sort((x, y) => x.a - y.a)) {
+    const prev = out[out.length - 1], step = (2 * p.z + 3) / p.r;
+    if (!prev || p.a >= prev.a + step) out.push(p);
+    else if (prev.a + step - p.a <= step / 2) out.push({ ...p, a: prev.a + step });
+    else prev.more = [...(prev.more ?? []), p.e];
   }
-  flush();
   return out;
 }
 
@@ -75,11 +67,14 @@ export function Dial({ day, entries, now, center }: { day: string; entries: Entr
     }
   }
 
-  const icon = ({ key, e, a, r, z }: Placed) => {
+  const icon = ({ key, e, a, r, z, more }: Placed) => {
     const [x, y] = pt(a, r), look = lookOf(e);
+    const all = [e, ...(more ?? [])];
+    // Compteur posé vers l’extérieur du cadran, pour ne pas masquer le pictogramme voisin.
+    const [bx, by] = pt(a, r + z * 0.95);
     return (
       <g key={key}>
-        <title>{`${ENTRY_META[e.type].label} ${hm(e.startedAt)}`}</title>
+        <title>{all.map((x) => `${ENTRY_META[x.type].label} ${hm(x.startedAt)}`).join(", ")}</title>
         {look.color2
           ? <>
             <path d={`M${x} ${y - z} A${z} ${z} 0 0 0 ${x} ${y + z} Z`} fill={look.color2} />
@@ -88,6 +83,10 @@ export function Dial({ day, entries, now, center }: { day: string; entries: Entr
           </>
           : <circle cx={x} cy={y} r={z} fill={look.color} stroke="var(--bg)" strokeWidth={2} />}
         <svg x={x - z * 0.68} y={y - z * 0.68} width={z * 1.36} height={z * 1.36} viewBox="0 0 24 24" fill="none" stroke="#1B1828" strokeWidth={2.3} strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: ICONS[look.icon] }} />
+        {more && <>
+          <circle cx={bx} cy={by} r={7.5} fill="var(--text)" stroke="var(--bg)" strokeWidth={1.5} />
+          <text x={bx} y={by + 3.2} fontSize={9} fontWeight={700} textAnchor="middle" fill="var(--bg)">{all.length}</text>
+        </>}
       </g>
     );
   };

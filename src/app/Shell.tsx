@@ -104,7 +104,7 @@ export function Shell() {
       </div>
       <nav className="tabs">
         {/* Colonnes proportionnelles au nombre d’onglets de chaque côté : tous les onglets ont la même largeur. */}
-        <div className="in" style={{ gridTemplateColumns: `${half}fr 64px ${nav.length - half}fr` }}>
+        <div className={`in${nav.length > 5 ? " many" : ""}`} style={{ gridTemplateColumns: `${half}fr 64px ${nav.length - half}fr` }}>
           <div className="half">{nav.slice(0, half).map(navItem)}</div>
           <button type="button" className="plusbtn" aria-label="Ajouter une saisie" onClick={() => sheet.open(<PlusSheet />)}><span><Icon name="plus" /></span></button>
           <div className="half">{nav.slice(half).map(navItem)}</div>

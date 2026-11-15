@@ -48,8 +48,8 @@ export function AccueilPage() {
   // Deux cases sous les boutons rapides : le dernier repas, et la dernière couche avec son contenu.
   const since: { key: string; label: string; detail: string; e: (typeof entries)[number]; look: Look }[] = [];
   if (isToday) {
-    if (lastFeed) since.push({ key: "feed", label: `Dernier ${lastFeed.type === "bottle" ? "biberon" : "repas"}`, detail: lastFeed.type === "bottle" ? `${num(lastFeed.data.ml)} ml` : ENTRY_META[lastFeed.type].short, e: lastFeed, look: lookOf(lastFeed) });
-    if (vis.includes("diaper") && lastDiaper?.type === "diaper") since.push({ key: "diaper", label: "Dernière couche", detail: diaperKind(lastDiaper), e: lastDiaper, look: lookOf(lastDiaper) });
+    if (lastFeed) since.push({ key: "feed", label: lastFeed.type === "bottle" ? "Biberon" : "Repas", detail: lastFeed.type === "bottle" ? `${num(lastFeed.data.ml)} ml` : ENTRY_META[lastFeed.type].short, e: lastFeed, look: lookOf(lastFeed) });
+    if (vis.includes("diaper") && lastDiaper?.type === "diaper") since.push({ key: "diaper", label: "Couche", detail: diaperKind(lastDiaper), e: lastDiaper, look: lookOf(lastDiaper) });
   }
 
   const stats: [string, string][] = [];
