@@ -74,6 +74,7 @@ export function AccueilPage() {
 
   return (
     <>
+      <h1 className="sr-only">Accueil</h1>
       <DayNav />
       {alertBlock(pressing, true)}
       {isToday && <PreparedBottles />}

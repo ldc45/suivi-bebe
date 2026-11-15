@@ -4,7 +4,7 @@
 .kpi b{ display:block; font-family:var(--serif); font-variation-settings:"SOFT" 100; font-weight:400; font-size:1.55rem; line-height:1.15; }
 .kpi span{ font-size:.88rem; color:var(--muted); }
 .chart{ margin-bottom:26px; }
-.chart h4{ margin:0 0 10px; font-weight:600; font-size:1rem; }
+.chart h3{ margin:0 0 10px; font-weight:600; font-size:1rem; }
 .cbox{ position:relative; height:220px; }
 .scroll{ overflow-x:auto; }
 table.grid{ border-collapse:collapse; font-size:.9rem; width:100%; }

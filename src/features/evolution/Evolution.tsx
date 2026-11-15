@@ -20,7 +20,7 @@ function Kpis({ items }: { items: [string, string][] }) {
   return <div className="kpis">{items.map(([v, l]) => <div className="kpi" key={l}><b>{v}</b><span>{l}</span></div>)}</div>;
 }
 function ChartBox({ title, height = 220, children }: { title: string; height?: number; children: ReactNode }) {
-  return <div className="chart"><h4>{title}</h4><div className="cbox" style={{ height }}>{children}</div></div>;
+  return <div className="chart"><h3>{title}</h3><div className="cbox" style={{ height }}>{children}</div></div>;
 }
 
 /** Section « Évolution » d’un onglet : choix du type (si plusieurs) et de la période. */
@@ -72,7 +72,7 @@ export function Charts({ type, range }: { type: EntryType; range: number }) {
         <ChartBox title="Nombre de biberons par jour" height={180}>
           <Bar options={baseOptions({ legend: false })} data={{ labels, datasets: [{ label: "Biberons", data: byDay.map((l) => l.length), backgroundColor: alpha(C), borderRadius: 8 }] }} />
         </ChartBox>
-        <div className="chart"><h4>Horaires des biberons</h4><Timeline days={days} entries={entries} types={["bottle"]} now={now} /></div>
+        <div className="chart"><h3>Horaires des biberons</h3><Timeline days={days} entries={entries} types={["bottle"]} now={now} /></div>
       </>;
     }
     case "breastfeeding": {
@@ -107,7 +107,7 @@ export function Charts({ type, range }: { type: EntryType; range: number }) {
         <ChartBox title="Pipi et selles par jour">
           <Bar options={baseOptions()} data={{ labels, datasets: [{ label: "Mouillées (pipi)", data: wet, backgroundColor: PEE_COLOR, borderRadius: 4 }, { label: "Selles (caca)", data: poo, backgroundColor: POO_COLOR, borderRadius: 4 }] }} />
         </ChartBox>
-        <div className="chart"><h4>Couleur des selles</h4>
+        <div className="chart"><h3>Couleur des selles</h3>
           <div className="frise">{[...days].reverse().map((k) => {
             const st = entriesOfDay(entries, k).filter((e): e is EntryOf<"diaper"> => e.type === "diaper" && e.data.poo).sort((a, b) => a.startedAt - b.startedAt);
             return <div className="r" key={k}><span className="dl">{dayLabel(k)}</span><span className="ds">{st.length ? st.map((e) => <i key={e.id} title={`${hm(e.startedAt)} ${e.data.color ? STOOL[e.data.color].label : "couleur non précisée"}`} style={{ "--sc": e.data.color ? STOOL[e.data.color].hex : "transparent" } as CSSProperties} />) : <span className="small muted">aucune selle</span>}</span></div>;
@@ -127,7 +127,7 @@ export function Charts({ type, range }: { type: EntryType; range: number }) {
         <ChartBox title="Heures de sommeil par jour (nuit : 20 h à 8 h)">
           <Bar options={baseOptions({ stacked: true, decimals: 1 })} data={{ labels, datasets: [{ label: "Nuit", data: s.map((x) => +x.night.toFixed(1)), backgroundColor: C, borderRadius: 4 }, { label: "Journée", data: s.map((x) => +x.day.toFixed(1)), backgroundColor: alpha(C), borderRadius: 4 }] }} />
         </ChartBox>
-        <div className="chart"><h4>Périodes de sommeil</h4><Timeline days={days} entries={entries} types={["sleep"]} now={now} /></div>
+        <div className="chart"><h3>Périodes de sommeil</h3><Timeline days={days} entries={entries} types={["sleep"]} now={now} /></div>
       </>;
     }
     case "tummy": {
@@ -167,7 +167,7 @@ export function Charts({ type, range }: { type: EntryType; range: number }) {
       }
       return <>
         <Kpis items={[[String(foods.size), "aliments"], [String(flat.length), "repas solides"], [String([...foods.values()].filter((f) => f.reactions.size).length), "avec réaction"]]} />
-        <div className="chart"><h4>Aliments proposés</h4><div className="scroll"><table className="grid"><thead><tr><th>Aliment</th><th>Première fois</th><th>Fois</th><th>Réaction</th></tr></thead>
+        <div className="chart"><h3>Aliments proposés</h3><div className="scroll"><table className="grid"><thead><tr><th>Aliment</th><th>Première fois</th><th>Fois</th><th>Réaction</th></tr></thead>
           <tbody>{[...foods.values()].map((f) => <tr key={f.name}><td>{f.name}</td><td>{dayLabel(dayKey(f.first))}</td><td>{f.n}</td><td className={f.reactions.size ? "tx-warn" : ""}>{f.reactions.size ? [...f.reactions].join(", ") : "Aucune"}</td></tr>)}</tbody></table></div></div>
       </>;
     }

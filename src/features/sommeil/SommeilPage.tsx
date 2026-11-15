@@ -30,6 +30,7 @@ export function SommeilPage() {
 
   return (
     <>
+      <h1 className="sr-only">Sommeil</h1>
       <DayNav />
       <div className="hero" style={{ "--c": ENTRY_META.sleep.color } as CSSProperties}>
         <div className="hl">{isToday ? "Sommeil aujourd’hui" : `Sommeil, ${dayLabel(viewDay)}`}</div>

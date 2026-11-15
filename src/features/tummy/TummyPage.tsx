@@ -30,6 +30,7 @@ export function TummyPage() {
 
   return (
     <>
+      <h1 className="sr-only">Tummy time</h1>
       <DayNav />
       <div className="hero" style={{ "--c": ENTRY_META.tummy.color } as CSSProperties}>
         <div className="hl">{isToday ? "Tummy time aujourd’hui" : `Tummy time, ${dayLabel(viewDay)}`}</div>

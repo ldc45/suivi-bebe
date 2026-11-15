@@ -21,6 +21,7 @@ export function CouchesPage() {
   const log = isToday ? entries.filter((e) => e.type === "diaper").slice(0, 12) : day;
   return (
     <>
+      <h1 className="sr-only">Couches</h1>
       <DayNav />
       <div className="hero" style={{ "--c": ENTRY_META.diaper.color } as CSSProperties}>
         <div className="hl">{isToday ? "Couches aujourd’hui" : `Couches, ${dayLabel(viewDay)}`}</div>

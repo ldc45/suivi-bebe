@@ -45,6 +45,7 @@ export function RepasPage() {
 
   return (
     <>
+      <h1 className="sr-only">Repas</h1>
       <DayNav />
       {isToday && bib && <PreparedBottles />}
       <div className="hero" style={{ "--c": ENTRY_META.bottle.color } as CSSProperties}>
