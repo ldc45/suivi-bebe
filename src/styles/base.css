@@ -5,6 +5,7 @@
   --moon:#9A6A0E; --btn:#231E33; --btn-text:#F5F2F9;
   --urgent:#B42E28; --warn:#9A6408; --info:#3F5BB0;
   --urgent-bg:#FBE8E6; --warn-bg:#FAF0DA; --info-bg:#E8ECFA;
+  --toast-accent:#F3CA70;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark){
@@ -13,6 +14,7 @@
     --moon:#F3CA70; --btn:#F2ECDF; --btn-text:#1B1828;
     --urgent:#FF9A90; --warn:#F3C270; --info:#A9BBFF;
     --urgent-bg:#3C2230; --warn-bg:#382E25; --info-bg:#262C4A;
+    --toast-accent:#7A4F00;
     color-scheme: dark;
   }
 }
@@ -21,6 +23,7 @@
   --moon:#F3CA70; --btn:#F2ECDF; --btn-text:#1B1828;
   --urgent:#FF9A90; --warn:#F3C270; --info:#A9BBFF;
   --urgent-bg:#3C2230; --warn-bg:#382E25; --info-bg:#262C4A;
+    --toast-accent:#7A4F00;
   color-scheme: dark;
 }
 /* Mode nuit : base sombre, textes secondaires éclaircis, puis un filtre ambré posé sur tout l’écran.
@@ -31,6 +34,7 @@
   --moon:#F3CA70; --btn:#F2ECDF; --btn-text:#1B1828;
   --urgent:#FFB0A8; --warn:#F3C270; --info:#C4D0FF;
   --urgent-bg:#3C2230; --warn-bg:#382E25; --info-bg:#262C4A;
+    --toast-accent:#7A4F00;
   color-scheme: dark;
 }
 :root[data-night] body::after{ content:""; position:fixed; inset:0; z-index:1000; pointer-events:none; background:#C25A30; mix-blend-mode:multiply; }
@@ -99,7 +103,7 @@ nav.tabs a[aria-current="page"] .ico{ --c:var(--moon); }
 .toast{ position:fixed; left:50%; bottom:calc(86px + env(safe-area-inset-bottom,0px)); transform:translate(-50%, 8px); background:var(--btn); color:var(--btn-text); padding:12px 16px; border-radius:14px; font-size:.95rem; z-index:30; opacity:0; transition:opacity .2s, transform .2s; pointer-events:none; display:flex; align-items:center; gap:10px; max-width:92vw; }
 .toast.show{ opacity:1; transform:translate(-50%,0); pointer-events:auto; }
 .toast span{ white-space:nowrap; }
-.toast button{ background:none; border:0; color:#F3CA70; font-weight:600; padding:10px 12px; margin:-8px -8px -8px 0; min-height:44px; }
+.toast button{ background:none; border:0; color:var(--toast-accent); font-weight:600; padding:10px 12px; margin:-8px -8px -8px 0; min-height:44px; }
 .center{ text-align:center; padding:60px 10px; }
 .center-link{ display:block; margin:16px auto 0; }
 .onboard{ padding-top:24px; }

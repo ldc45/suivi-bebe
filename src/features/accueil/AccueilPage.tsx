@@ -60,10 +60,22 @@ export function AccueilPage() {
   if (vis.includes("sleep")) stats.push([dur(timeIn(entries, "sleep", s0, s1, now)), "de sommeil"]);
 
   const alerts = isToday ? computeAlerts(baby, entries, now) : [];
+  // Urgences et points d’attention tout en haut : une alerte « appelez votre médecin » ne doit pas attendre
+  // le défilement. Les simples rappels restent plus bas.
+  const pressing = alerts.filter((a) => a.level === "urgent" || a.level === "attention");
+  const later = alerts.filter((a) => a.level === "rappel" || a.level === "info");
+  const disclaimer = <p className="disclaimer">Repères indicatifs selon l’âge de {baby.name}. Ils ne remplacent pas un avis médical. Urgence : 15 ou 112.</p>;
+  const alertBlock = (list: typeof alerts, top: boolean) => list.length > 0 && (
+    <div className={`alerts${top ? " top" : ""}`} role={top ? "alert" : undefined}>
+      {list.map((a) => <div key={a.title} className={`note ${a.level}`}><b>{a.title}</b><p>{a.text}</p></div>)}
+      {(top || !pressing.length) && disclaimer}
+    </div>
+  );
 
   return (
     <>
       <DayNav />
+      {alertBlock(pressing, true)}
       {isToday && <PreparedBottles />}
       {running.map((e) => (
         <div key={e.id} className="sleepbar" style={{ "--c": ENTRY_META[e.type].color } as CSSProperties}>
@@ -86,12 +98,7 @@ export function AccueilPage() {
         </div>
       )}
       <MedCards />
-      {alerts.length > 0 && (
-        <div className="alerts">
-          {alerts.map((a) => <div key={a.title} className={`note ${a.level}`}><b>{a.title}</b><p>{a.text}</p></div>)}
-          <p className="disclaimer">Repères indicatifs selon l’âge de {baby.name}. Ils ne remplacent pas un avis médical. Urgence : 15 ou 112.</p>
-        </div>
-      )}
+      {alertBlock(later, false)}
       <WeekTrends types={vis} />
       <h2 className="sec">{isToday ? "Aujourd’hui" : dayLabel(viewDay)}</h2>
       {day.length

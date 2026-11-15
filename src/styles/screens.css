@@ -25,6 +25,7 @@
 .note p{ margin:3px 0 0; font-size:.95rem; color:var(--text); }
 .note.urgent{ color:var(--urgent); } .note.attention{ color:var(--warn); } .note.rappel,.note.info{ color:var(--info); }
 .alerts{ margin-top:22px; }
+.alerts.top{ margin:6px 0 10px; }
 .disclaimer{ font-size:.86rem; color:var(--muted); margin:0; }
 .medcard{ display:flex; align-items:center; gap:12px; background:var(--surface); border-radius:16px; padding:12px 12px 12px 14px; margin-bottom:8px; }
 .medcard.done{ opacity:.75; }
@@ -71,7 +72,7 @@
 .mini{ background:var(--surface); border-radius:16px; padding:12px 14px; display:flex; flex-direction:column; }
 .mini .num{ font-size:1.35rem; }
 .mini span:not(.num){ font-size:.88rem; color:var(--muted); }
-.mini em{ font-style:normal; font-size:.88rem; color:#5AAFD0; margin-top:4px; font-weight:500; }
+.mini em{ font-style:normal; font-size:.88rem; color:var(--info); margin-top:4px; font-weight:500; }
 .card{ background:var(--surface); border-radius:18px; padding:14px; margin-top:12px; }
 .card p{ margin:0 0 6px; } .card p:last-child{ margin:0; }
 .ch{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
