@@ -67,7 +67,7 @@ export function Shell() {
   const { night } = useDisplay();
   useShortcut();
   const navItem = (n: (typeof NAV)[number]) => (
-    <NavLink key={n.to} to={n.to} end={n.to === "/"} onClick={() => window.scrollTo(0, 0)}><Icon name={n.icon} />{n.label}</NavLink>
+    <NavLink key={n.to} to={n.to} end={n.to === "/"} onClick={() => window.scrollTo(0, 0)}><Icon name={n.icon} /><span className="lbl">{n.label}</span></NavLink>
   );
 
   return (
@@ -76,7 +76,7 @@ export function Shell() {
         <header className="top">
           <button type="button" className="who" aria-label="Changer d’enfant" onClick={() => sheet.open(<BabySwitcher />)}>
             <span className="av" style={{ background: avatarColor(idx) } as CSSProperties}>{initial(baby?.name)}</span>
-            <span className="wtx"><b>{baby?.name}</b><span>{ageLabel(baby?.birthDate)}</span></span>
+            <span className="wtx"><b className={(baby?.name.length ?? 0) > 12 ? "long" : undefined}>{baby?.name}</b><span>{ageLabel(baby?.birthDate)}</span></span>
             <Icon name="chevron" className="rot" />
           </button>
           <div className="topr">
@@ -104,7 +104,7 @@ export function Shell() {
       </div>
       <nav className="tabs">
         {/* Colonnes proportionnelles au nombre d’onglets de chaque côté : tous les onglets ont la même largeur. */}
-        <div className={`in${nav.length > 5 ? " many" : ""}`} style={{ gridTemplateColumns: `${half}fr 64px ${nav.length - half}fr` }}>
+        <div className={`in${nav.length > 5 ? " many" : ""}`} style={{ gridTemplateColumns: `${half}fr var(--plus-col, 64px) ${nav.length - half}fr` }}>
           <div className="half">{nav.slice(0, half).map(navItem)}</div>
           <button type="button" className="plusbtn" aria-label="Ajouter une saisie" onClick={() => sheet.open(<PlusSheet />)}><span><Icon name="plus" /></span></button>
           <div className="half">{nav.slice(half).map(navItem)}</div>

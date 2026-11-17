@@ -28,7 +28,7 @@ table.grid th:first-child, table.grid td:first-child{ text-align:left; position:
 /* Frise sur 24 heures */
 .tl{ font-size:.84rem; }
 .tl-r{ display:flex; align-items:center; gap:8px; height:26px; }
-.tl-d{ width:84px; flex:none; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tl-d{ width:5.6rem; flex:none; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .tl-t{ position:relative; flex:1; height:16px; border-radius:8px; background:repeating-linear-gradient(90deg, var(--surface) 0 calc(25% - 1px), var(--line) calc(25% - 1px) 25%); }
 .tl-t i{ position:absolute; top:2px; bottom:2px; min-width:3px; border-radius:6px; background:var(--c); }
 .tl-t i.pt{ top:0; bottom:0; min-width:4px; border-radius:2px; }
