@@ -1,5 +1,5 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useBabies, useMedications } from "@/babies/api";
+import { linkMyAccount, useBabies, useMedications, useMembers } from "@/babies/api";
 import type { Baby, Medication } from "@/babies/types";
 import { useEntries } from "@/entries/api";
 import type { Entry, EntryOf } from "@/entries/types";
@@ -24,6 +24,8 @@ interface AppState {
   prepared: EntryOf<"bottle">[];
   entriesLoading: boolean;
   medications: Medication[];
+  /** Prénom des membres du foyer, par identifiant de compte. */
+  names: Record<string, string>;
   /** Horloge rafraîchie chaque minute, pour les durées « depuis ». */
   now: number;
 }
@@ -51,6 +53,9 @@ export function AppProvider({ email, userId, householdId, children }: { email: s
   }, []);
 
   const entriesQ = useEntries(baby?.id);
+  const membersQ = useMembers(householdId);
+  const names = useMemo(() => Object.fromEntries((membersQ.data ?? []).filter((m) => m.userId && m.displayName).map((m) => [m.userId!, m.displayName!])), [membersQ.data]);
+  useEffect(() => { void linkMyAccount(); }, [userId]);
   const medsQ = useMedications(baby?.id);
   useRealtime(householdId, baby?.id);
 
@@ -73,7 +78,7 @@ export function AppProvider({ email, userId, householdId, children }: { email: s
     email, userId, householdId, babies, baby, selectBaby,
     viewDay, isToday: viewDay === today, setViewDay: (k) => setDay(k && k < today ? k : null),
     entries, prepared, entriesLoading: entriesQ.isLoading,
-    medications: medsQ.data ?? [], now,
+    medications: medsQ.data ?? [], names, now,
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

@@ -1,15 +1,14 @@
-import { type CSSProperties, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { type CSSProperties, useEffect, useState } from "react";
 import { useApp } from "@/app/AppContext";
-import { useMedicationMutations, useUpdateBaby } from "@/babies/api";
+import { useMedicationMutations, useMembers, useSetMyName, useUpdateBaby } from "@/babies/api";
 import { useBabyForm } from "@/babies/BabyForm";
 import { FREQ_LABEL, type Frequency, type Thresholds } from "@/babies/types";
 import { ENTRY_META, ENTRY_ORDER, type EntryType } from "@/entries/types";
 import { signOut } from "@/lib/auth";
 import { NIGHT_FROM, NIGHT_TO, setAutoNight, setTheme, type Theme, toggleNight, useDisplay } from "@/lib/display";
 import { parseNum } from "@/lib/format";
+import { currentSubscription, disablePush, enablePush, type PushPrefs, pushSupport, savePushPrefs } from "@/lib/push";
 import { autoGap, thresholds } from "@/lib/rules";
-import { supabase } from "@/lib/supabase";
 import { ageDays, ageLabel } from "@/lib/time";
 import { Chips, Field, Toggle } from "@/ui/controls";
 import { useToast } from "@/ui/Overlay";
@@ -146,20 +145,74 @@ function DisplaySection() {
   );
 }
 
+const OTHER_LABEL: Record<PushPrefs["other"], string> = { all: "Tout", important: "L’important seulement", none: "Rien" };
+
+/** Prénom affiché à l’autre parent, et notifications de ce téléphone. */
+function NotificationsSection() {
+  const { email, householdId } = useApp();
+  const toast = useToast();
+  const members = useMembers(householdId);
+  const setName = useSetMyName(householdId);
+  const me = members.data?.find((m) => m.email.toLowerCase() === email.toLowerCase());
+  const [name, setNameInput] = useState<string | null>(null);
+  const support = pushSupport();
+  const [sub, setSub] = useState<{ endpoint: string; prefs: PushPrefs } | null | undefined>(undefined);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => { void currentSubscription().then(setSub, () => setSub(null)); }, []);
+
+  const saveName = () => {
+    const v = (name ?? me?.displayName ?? "").trim();
+    if (!v) return toast("Indiquez votre prénom.");
+    setName.mutate(v, { onSuccess: () => { setNameInput(null); toast("Prénom enregistré"); } });
+  };
+  const enable = async () => {
+    setBusy(true);
+    const err = await enablePush(householdId);
+    setBusy(false);
+    if (err) return toast(err);
+    setSub(await currentSubscription());
+    toast("Notifications activées sur ce téléphone");
+  };
+  const disable = async () => { setBusy(true); await disablePush(); setBusy(false); setSub(null); toast("Notifications désactivées sur ce téléphone"); };
+  const change = async (prefs: PushPrefs) => {
+    if (!sub) return;
+    setSub({ ...sub, prefs });
+    if (!(await savePushPrefs(sub.endpoint, prefs))) toast("Modification non enregistrée. Vérifiez la connexion.");
+  };
+
+  return (
+    <div className="panel">
+      <Field label="Votre prénom, affiché à l’autre parent" htmlFor="myName">
+        <div style={{ display: "flex", gap: 8 }}>
+          <input id="myName" className="inp" autoComplete="given-name" maxLength={40} value={name ?? me?.displayName ?? ""} onChange={(e) => setNameInput(e.target.value)} />
+          <button type="button" className="btn" disabled={name === null || setName.isPending} onClick={saveName}>Enregistrer</button>
+        </div>
+      </Field>
+      {support === "ios-install" && <p className="small muted">Sur iPhone, les notifications fonctionnent une fois l’appli installée sur l’écran d’accueil (Partager, puis Sur l’écran d’accueil), avec iOS 16.4 ou plus récent.</p>}
+      {support === "unsupported" && <p className="small muted">Ce navigateur ne permet pas les notifications.</p>}
+      {support === "ok" && sub === null && (
+        <button type="button" className="btn primary wide block" disabled={busy} onClick={enable}>Activer les notifications sur ce téléphone</button>
+      )}
+      {support === "ok" && sub && <>
+        <div className="set-item">
+          <span>Biberon préparé<br /><span className="small muted">10 min avant l’heure limite, puis s’il est à jeter.</span></span>
+          <Toggle checked={sub.prefs.bottle} label="Rappels du biberon préparé" onChange={(v) => change({ ...sub.prefs, bottle: v })} />
+        </div>
+        <Field label="Ce que fait l’autre parent"><Chips name="other" options={OTHER_LABEL} value={sub.prefs.other} onChange={(v) => change({ ...sub.prefs, other: v })} /></Field>
+        <p className="small muted" style={{ marginTop: 0 }}>Une seule notification par sujet : la nouvelle remplace l’ancienne. De 21 h à 7 h, sans son ni vibration, sauf fièvre, selles à signaler ou biberon à jeter.</p>
+        <button type="button" className="btn" disabled={busy} onClick={disable}>Désactiver sur ce téléphone</button>
+      </>}
+    </div>
+  );
+}
+
 function AccountSection() {
   const { email, householdId } = useApp();
-  const members = useQuery({
-    queryKey: ["members", householdId],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("household_members").select("email").eq("household_id", householdId);
-      if (error) throw error;
-      return (data as { email: string }[]).map((m) => m.email);
-    },
-  });
+  const members = useMembers(householdId);
   return (
     <div className="panel small">
       <p style={{ marginTop: 0 }}>Connecté avec {email}.</p>
-      {members.data && <p>Membres du foyer : {members.data.join(", ")}.</p>}
+      {members.data && <p>Membres du foyer : {members.data.map((m) => (m.displayName ? `${m.displayName} (${m.email})` : m.email)).join(", ")}.</p>}
       <p>Pour donner accès à quelqu’un, ajoutez son adresse dans Supabase, table <b>household_members</b>. Cette personne pourra ensuite se connecter avec son adresse e-mail et son mot de passe.</p>
       <button type="button" className="btn" onClick={() => signOut()}>Se déconnecter</button>
     </div>
@@ -179,6 +232,7 @@ export function ReglagesPage() {
         <h2 className="sec">Types d’activité affichés</h2><TypesSection />
         <h2 className="sec">Repères des alertes</h2><ThresholdsSection />
       </div>
+      <h2 className="sec">Notifications</h2><NotificationsSection />
       <h2 className="sec">Affichage</h2><DisplaySection />
       <h2 className="sec">Compte et partage</h2><AccountSection />
     </>

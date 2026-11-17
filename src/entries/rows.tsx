@@ -8,13 +8,17 @@ import { lookBackground, lookOf } from "./look";
 import { EntrySheet } from "./EntrySheet";
 import { ENTRY_META, type Entry } from "./types";
 
-function author(e: Entry, userId: string) {
-  return e.createdBy && e.createdBy !== userId ? ", ajouté par l’autre parent" : "";
+/** Détail d’une saisie, suivi de « ajouté par Ludo » quand elle vient de l’autre parent. */
+function details(parts: (string | null | undefined)[], e: Entry, userId: string, names: Record<string, string>) {
+  const text = parts.filter(Boolean).join(". ");
+  if (!e.createdBy || e.createdBy === userId) return text;
+  const by = `ajouté par ${names[e.createdBy] ?? "l’autre parent"}`;
+  return text ? `${text}, ${by}` : by.charAt(0).toUpperCase() + by.slice(1);
 }
 
 /** Ligne avec pictogramme, utilisée dans les listes des onglets. */
 function LogRow({ entry: e, withDay }: { entry: Entry; withDay?: boolean }) {
-  const { userId, now } = useApp();
+  const { userId, names, now } = useApp();
   const sheet = useSheet();
   const meta = ENTRY_META[e.type], look = lookOf(e);
   const title = e.type === "diaper" ? diaperKind(e) : meta.label;
@@ -23,7 +27,7 @@ function LogRow({ entry: e, withDay }: { entry: Entry; withDay?: boolean }) {
   return (
     <button type="button" className="lrow" style={{ "--c": look.color } as CSSProperties} onClick={() => sheet.open(<EntrySheet type={e.type} entry={e} />)}>
       <span className="lic" style={look.color2 ? { background: lookBackground(look, 30) } : undefined}><Icon name={look.icon} /></span>
-      <span className="lt"><b>{title}</b><span>{[desc, e.note].filter(Boolean).join(". ")}{author(e, userId)}</span></span>
+      <span className="lt"><b>{title}</b><span>{details([desc, e.note], e, userId, names)}</span></span>
       <span className="lh">{withDay && k !== todayKey() && <>{dayLabel(k)}<br /></>}{hm(e.startedAt)}</span>
     </button>
   );

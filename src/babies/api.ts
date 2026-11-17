@@ -28,6 +28,44 @@ export const keys = {
   medications: (babyId: string | undefined) => ["medications", babyId] as const,
 };
 
+export interface Member { email: string; displayName: string | null; userId: string | null; role: string }
+
+/**
+ * Membres du foyer, avec leur prénom. `select("*")` : tant que la migration des notifications n’a pas été
+ * lancée, les colonnes display_name et user_id n’existent pas, et l’appli affiche « l’autre parent ».
+ */
+export function useMembers(householdId: string | undefined) {
+  return useQuery({
+    queryKey: ["members", householdId],
+    enabled: !!householdId,
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("household_members").select("*").eq("household_id", householdId!);
+      if (error) throw error;
+      return (data as { email: string; display_name?: string | null; user_id?: string | null; role: string }[])
+        .map((m): Member => ({ email: m.email, displayName: m.display_name ?? null, userId: m.user_id ?? null, role: m.role }));
+    },
+  });
+}
+
+/** Enregistre le prénom de la personne connectée (et relie son compte à sa ligne de membre). */
+export function useSetMyName(householdId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationKey: SETTINGS_KEY,
+    mutationFn: async (name: string) => {
+      const { error } = await supabase.rpc("set_my_name", { name });
+      if (error) throw error;
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["members", householdId] }),
+  });
+}
+
+/** Relie le compte connecté à sa ligne de membre (sans effet avant la migration des notifications). */
+export async function linkMyAccount() {
+  await supabase.rpc("link_my_account").then(() => undefined, () => undefined);
+}
+
 /** Foyer de la personne connectée (null si son e-mail n’est membre d’aucun foyer). */
 export function useHousehold(enabled: boolean) {
   return useQuery({

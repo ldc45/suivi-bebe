@@ -103,10 +103,14 @@ Les règles RLS limitent chaque table aux membres du foyer, identifiés par l’
 
 ---
 
+## Notifications
+
+Envoyées par la fonction Supabase `notifier` (`supabase/functions/notifier`) : ce que fait l'autre parent (prénom, une seule notification par sujet, silencieuses de 21 h à 7 h sauf alertes) et rappels des biberons préparés. Les clés de chiffrement sont créées par la fonction elle-même. Installation : [docs/NOTIFICATIONS.md](docs/NOTIFICATIONS.md).
+
 ## Pistes
 
 - Résumé « Pendant votre absence » pour le parent qui se lève.
-- Notifications entre parents et rappels de traitements (Web Push, Edge Function Supabase).
+- Rappels des traitements (vitamine D) par notification.
 - Chrono de tétée avec bascule gauche / droite.
 - Export PDF pour les rendez-vous chez le pédiatre.
 - Pagination du journal au-delà de 180 jours.

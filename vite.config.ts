@@ -32,6 +32,8 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: "/index.html",
+        // Réception des notifications : script ajouté au service worker généré.
+        importScripts: ["push-sw.js"],
         // Polices Google gardées en cache : l’appli garde sa typographie hors ligne.
         runtimeCaching: [
           { urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i, handler: "StaleWhileRevalidate", options: { cacheName: "google-fonts-css" } },
