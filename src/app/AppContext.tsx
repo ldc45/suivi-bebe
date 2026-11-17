@@ -41,7 +41,14 @@ export function AppProvider({ email, userId, householdId, children }: { email: s
 
   const [day, setDay] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
-  useEffect(() => { const t = window.setInterval(() => setNow(Date.now()), 60_000); return () => window.clearInterval(t); }, []);
+  useEffect(() => {
+    const tick = () => setNow(Date.now());
+    const t = window.setInterval(tick, 60_000);
+    // Le téléphone ralentit les minuteries en arrière-plan : on se remet à l’heure au retour.
+    const onShow = () => document.visibilityState === "visible" && tick();
+    document.addEventListener("visibilitychange", onShow);
+    return () => { window.clearInterval(t); document.removeEventListener("visibilitychange", onShow); };
+  }, []);
 
   const entriesQ = useEntries(baby?.id);
   const medsQ = useMedications(baby?.id);
@@ -50,6 +57,9 @@ export function AppProvider({ email, userId, householdId, children }: { email: s
   // Un biberon préparé n’est pas encore un repas : il est retiré des saisies (totaux, alertes, cadran, listes).
   const all = entriesQ.data;
   const entries = useMemo(() => (all ?? []).filter((e) => !isPrepared(e)), [all]);
+  // Une saisie faite « maintenant » doit apparaître tout de suite : l’horloge se remet à l’heure à chaque
+  // changement des saisies (sinon le cadran la croit dans le futur jusqu’à la minute suivante).
+  useEffect(() => { setNow(Date.now()); }, [all]);
   const prepared = useMemo(() => (all ?? []).filter(isPrepared).sort((a, b) => a.startedAt - b.startedAt), [all]);
 
   const selectBaby = useCallback((id: string) => {
