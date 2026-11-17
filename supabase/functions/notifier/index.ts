@@ -6,7 +6,8 @@
  *   membres du foyer de ce qu'un parent vient de noter.
  * - POST {"kind":"tick"} chaque minute (Supabase Cron) : rappels des biberons préparés.
  *
- * Les POST ne sont acceptés que de Supabase lui-même (clé « service_role » ou en-tête x-notifier-secret).
+ * Les POST ne sont acceptés que de la base elle-même : en-tête x-notifier-secret égal au secret tiré au hasard
+ * par la base (table notifier_settings, migration 20261118000001), ou clé « service_role ».
  * Contenu des messages : notify.ts (testé dans le dépôt).
  */
 import webpush from "npm:web-push@3.6.7";
@@ -25,14 +26,16 @@ const CORS = {
 };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...CORS, "content-type": "application/json" } });
 
-/** Appel venu de Supabase (webhook, cron) et non d'un téléphone. */
-function trusted(req: Request): boolean {
-  if (SECRET && req.headers.get("x-notifier-secret") === SECRET) return true;
+/** Appel venu de la base (déclencheur sur les saisies, tâche planifiée) et non d'un téléphone. */
+async function trusted(req: Request): Promise<boolean> {
+  const given = req.headers.get("x-notifier-secret");
+  if (given) {
+    if (SECRET && given === SECRET) return true;
+    const { data } = await db.from("notifier_settings").select("secret").eq("id", 1).maybeSingle();
+    if (data?.secret && given === data.secret) return true;
+  }
   const token = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
-  if (!token) return false;
-  if (token === SERVICE_KEY) return true;
-  // La passerelle de Supabase a déjà vérifié la signature du jeton (vérification JWT activée).
-  try { return JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).role === "service_role"; } catch { return false; }
+  return Boolean(token) && token === SERVICE_KEY;
 }
 
 /** Clés VAPID, créées une fois et gardées dans la table push_config (invisible depuis l'appli). */
@@ -117,7 +120,7 @@ Deno.serve(async (req) => {
   try {
     if (req.method === "GET") return json({ publicKey: (await keys()).public_key });
     if (req.method !== "POST") return json({ error: "méthode non prise en charge" }, 405);
-    if (!trusted(req)) return json({ error: "réservé à Supabase" }, 401);
+    if (!(await trusted(req))) return json({ error: "réservé à Supabase" }, 401);
     const body = await req.json().catch(() => ({}));
     if (body.kind === "tick") return json(await onTick());
     if (body.table === "entries" && (body.type === "INSERT" || body.type === "UPDATE") && body.record) {

@@ -1,48 +1,19 @@
-# Notifications : installation (une seule fois)
+# Notifications
 
-Environ 15 minutes, tout se passe dans Supabase (supabase.com, votre projet). Rien à faire sur Netlify.
-Les noms de menus peuvent légèrement varier selon la version de l'interface.
+## Côté serveur (Supabase) : déjà installé
 
-## 1. Base de données (SQL Editor)
+Tout est dans le dépôt et a été appliqué au projet Supabase :
 
-Dans **SQL Editor**, puis **New query**, collez et lancez (**Run**) chacun de ces fichiers du dépôt, dans l'ordre :
+- `supabase/migrations/20261117000000_entries_author.sql` : la base inscrit elle-même l'auteur de chaque saisie.
+- `supabase/migrations/20261118000000_notifications.sql` : prénoms des parents, abonnements des téléphones.
+- `supabase/migrations/20261118000001_notifier_hooks.sql` : la base appelle la fonction `notifier` à chaque saisie, et chaque minute tant qu'un biberon préparé est en attente. Les appels portent un secret tiré au hasard par la base (table `notifier_settings`, invisible depuis l'appli).
+- `supabase/functions/notifier` : la fonction qui envoie les notifications (déployée avec « Verify JWT » désactivé, car elle vérifie elle-même ce secret).
 
-1. `supabase/migrations/20261117000000_entries_author.sql` (si ce n'est pas déjà fait) ;
-2. `supabase/migrations/20261118000000_notifications.sql`.
+Pour un autre projet Supabase : lancer les migrations dans l'ordre (SQL Editor), en remplaçant l'adresse de la fonction dans `20261118000001_notifier_hooks.sql`, puis déployer la fonction (`supabase functions deploy notifier --no-verify-jwt`).
 
-Chacun doit afficher « Success ». Ils ne modifient aucune saisie et peuvent être relancés sans risque.
+## Sur chaque téléphone
 
-## 2. La fonction « notifier » (Edge Functions)
-
-1. Menu **Edge Functions**, puis **Deploy a new function**, puis **Via Editor**.
-2. Nom de la fonction : `notifier`.
-3. Remplacez le contenu du fichier `index.ts` par celui de `supabase/functions/notifier/index.ts`.
-4. Ajoutez un second fichier nommé `notify.ts` avec le contenu de `supabase/functions/notifier/notify.ts`.
-5. **Deploy**. Laissez la vérification JWT (« Verify JWT ») **activée**.
-
-Avec la CLI Supabase, l'équivalent est : `supabase functions deploy notifier`.
-
-## 3. Prévenir à chaque saisie (Database Webhooks)
-
-1. Menu **Database**, puis **Webhooks** (ou **Integrations**, puis **Database Webhooks**), puis **Create a new hook**.
-2. Nom : `notifier-saisies`. Table : `entries`. Événements : **Insert** et **Update**.
-3. Type : **Supabase Edge Functions**, fonction `notifier`, méthode **POST**.
-4. En-têtes HTTP : cliquez sur **Add auth header with service key** (cela ajoute `Authorization: Bearer …`).
-5. **Create webhook**.
-
-## 4. Rappels des biberons préparés (Cron)
-
-1. Menu **Integrations**, puis **Cron** (activez l'extension si Supabase le propose), puis **Create job**.
-2. Nom : `notifier-biberons`. Planification : `* * * * *` (chaque minute).
-3. Type : **Supabase Edge Function**, fonction `notifier`, méthode **POST**, corps : `{"kind":"tick"}`.
-4. En-têtes : **Add auth header with service key**.
-5. **Create**.
-
-Un appel par minute représente environ 45 000 appels par mois, loin de la limite de l'offre gratuite.
-
-## 5. Sur chaque téléphone
-
-1. Ouvrez l'appli (après la mise à jour), **Réglages**, section **Notifications**.
+1. Ouvrez l'appli, **Réglages**, section **Notifications**.
 2. Saisissez votre **prénom**, puis **Enregistrer**.
 3. **Activer les notifications sur ce téléphone**, puis acceptez la demande du téléphone.
 
@@ -50,6 +21,6 @@ Sur iPhone : l'appli doit être installée sur l'écran d'accueil (Partager, pui
 
 ## En cas de souci
 
-- « Les notifications ne sont pas encore installées côté serveur » : l'étape 2 n'est pas faite, ou la fonction ne s'appelle pas exactement `notifier`.
-- Rien n'arrive après une saisie de l'autre parent : vérifiez l'étape 3, puis **Edge Functions**, `notifier`, **Logs**.
-- Si les en-têtes d'authentification posent problème, une alternative : dans **Edge Functions**, **Secrets**, ajoutez `NOTIFIER_SECRET` avec une valeur de votre choix, et mettez l'en-tête `x-notifier-secret` avec cette même valeur dans le webhook et le cron.
+- Rien n'arrive après une saisie de l'autre parent : vérifiez que les deux téléphones ont activé les notifications, puis dans Supabase, **Edge Functions**, `notifier`, **Logs**.
+- On ne reçoit jamais de notification pour ses propres saisies : c'est voulu.
+- La nuit (21 h à 7 h), les notifications arrivent sans son, sauf fièvre, selles à signaler et biberon à jeter.

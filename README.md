@@ -105,7 +105,7 @@ Les règles RLS limitent chaque table aux membres du foyer, identifiés par l’
 
 ## Notifications
 
-Envoyées par la fonction Supabase `notifier` (`supabase/functions/notifier`) : ce que fait l'autre parent (prénom, une seule notification par sujet, silencieuses de 21 h à 7 h sauf alertes) et rappels des biberons préparés. Les clés de chiffrement sont créées par la fonction elle-même. Installation : [docs/NOTIFICATIONS.md](docs/NOTIFICATIONS.md).
+Envoyées par la fonction Supabase `notifier` (`supabase/functions/notifier`) : ce que fait l'autre parent (prénom, une seule notification par sujet, silencieuses de 21 h à 7 h sauf alertes) et rappels des biberons préparés. Les clés de chiffrement sont créées par la fonction elle-même. La base appelle elle-même la fonction (déclencheur sur les saisies, tâche chaque minute tant qu'un biberon préparé attend). Détails : [docs/NOTIFICATIONS.md](docs/NOTIFICATIONS.md).
 
 ## Pistes
 
