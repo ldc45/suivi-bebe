@@ -101,17 +101,19 @@
 .syncbar p{ margin:0; }
 
 /* Saisie en un geste (accueil) */
-.onetap{ display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr)); gap:10px; margin:16px 0 4px; }
-.onetap button{ display:flex; align-items:center; gap:10px; min-width:0; min-height:60px; padding:10px 12px; border:0; border-radius:16px; text-align:left; background:color-mix(in srgb, var(--c) 14%, var(--surface)); transition:transform .12s; }
+/* Boutons rapides et cases « depuis » : toujours côte à côte ; c’est leur contenu qui s’adapte
+   (pictogramme masqué quand la carte est étroite, texte qui passe à la ligne). */
+.onetap{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; margin:16px 0 4px; }
+.onetap button{ container-type:inline-size; display:flex; align-items:center; gap:10px; min-width:0; min-height:60px; padding:10px 12px; border:0; border-radius:16px; text-align:left; background:color-mix(in srgb, var(--c) 14%, var(--surface)); transition:transform .12s; }
 .onetap .lt b{ font-size:.95rem; line-height:1.2; }
 .onetap .lt span{ font-size:.84rem; }
 .onetap:has(> :only-child){ grid-template-columns:1fr; }
 .onetap button:disabled{ opacity:.55; }
 
 /* Dernier repas et dernière couche (sous les boutons rapides) */
-.since{ display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr)); gap:10px; margin:10px 0 4px; }
+.since{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; margin:10px 0 4px; }
 .since:has(> :only-child){ grid-template-columns:1fr; }
-.since button{ display:flex; align-items:center; gap:10px; min-width:0; border:0; border-radius:16px; padding:10px 12px; text-align:left; background:var(--surface); }
+.since button{ container-type:inline-size; display:flex; align-items:center; gap:10px; min-width:0; border:0; border-radius:16px; padding:10px 12px; text-align:left; background:var(--surface); }
 .since .st{ display:flex; flex-direction:column; min-width:0; }
 .since b{ font-size:1.15rem; font-weight:400; line-height:1.2; }
 .since .st span{ font-size:.84rem; color:var(--muted); }
@@ -130,3 +132,7 @@
 .prepbar .pa .btn.primary{ flex:1.5; }
 .prepbtn{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; min-height:48px; margin-top:10px; border:1px dashed color-mix(in srgb, var(--c) 60%, var(--line)); border-radius:14px; background:none; font-weight:600; color:var(--text); }
 .prepbtn .ico{ --c:var(--c); width:20px; height:20px; }
+
+@container (max-width: 10.5rem){
+  .onetap .lic, .since .lic{ display:none; }
+}
