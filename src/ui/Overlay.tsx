@@ -88,8 +88,21 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("popstate", onPop);
   }, [hide]);
 
-  // Le focus entre dans la feuille à l’ouverture (sans ouvrir le clavier du téléphone).
-  useEffect(() => { if (shown) sheetRef.current?.focus({ preventScroll: true }); }, [shown]);
+  // Le focus entre dans la feuille à l’ouverture (sans ouvrir le clavier du téléphone), et y revient quand
+  // son contenu change (de « Ajouter » à « Couche », le bouton qui avait le focus disparaît).
+  useEffect(() => {
+    if (!shown) return;
+    const el = sheetRef.current;
+    if (el && !el.contains(document.activeElement)) el.focus({ preventScroll: true });
+  }, [shown, node]);
+
+  // Échap ferme la feuille, où que soit le focus.
+  useEffect(() => {
+    if (!node) return;
+    const onKey = (e: globalThis.KeyboardEvent) => { if (e.key === "Escape" && isOpen.current) close(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [node, close]);
 
   /*
    * Glisser pour fermer, depuis la poignée ou l’en-tête. Pendant le geste, la feuille suit le doigt
@@ -133,9 +146,8 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  /** Tab et Maj+Tab restent dans la feuille ; Échap la ferme. */
+  /** Tab et Maj+Tab restent dans la feuille. */
   const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "Escape") { e.stopPropagation(); close(); return; }
     if (e.key !== "Tab" || !sheetRef.current) return;
     const items = [...sheetRef.current.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((x) => x.offsetParent !== null);
     if (!items.length) return;

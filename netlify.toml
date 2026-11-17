@@ -10,3 +10,19 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+# En-têtes de sécurité (audit de sécurité, point 2).
+# CSP : la page ne charge et ne contacte que l'appli elle-même, Supabase (données et temps réel) et les
+# polices Google. Le seul script intégré autorisé est celui qui applique le thème avant l'affichage
+# (index.html), identifié par son empreinte : si on le modifie, mettre à jour l'empreinte
+# (le test src/lib/csp.test.ts le signale). 'unsafe-inline' sur les styles : React pose des attributs style.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'sha256-q3d8SiF7ZLGFdRyBP1LI5OBpOUfuW93iUoTn/shzUrs='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Cross-Origin-Opener-Policy = "same-origin"
