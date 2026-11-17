@@ -153,7 +153,7 @@ function NotificationsSection() {
   const toast = useToast();
   const members = useMembers(householdId);
   const setName = useSetMyName(householdId);
-  const me = members.data?.find((m) => m.email.toLowerCase() === email.toLowerCase());
+  const me = members.data?.find((m) => m.email?.toLowerCase() === email.toLowerCase());
   const [name, setNameInput] = useState<string | null>(null);
   const support = pushSupport();
   const [sub, setSub] = useState<{ endpoint: string; prefs: PushPrefs } | null | undefined>(undefined);

@@ -34,9 +34,15 @@ export interface Member { email: string; displayName: string | null; userId: str
  * Membres du foyer, avec leur prénom. `select("*")` : tant que la migration des notifications n’a pas été
  * lancée, les colonnes display_name et user_id n’existent pas, et l’appli affiche « l’autre parent ».
  */
+/**
+ * « members-v2 » : l'ancienne version gardait sur le téléphone, sous ["members", foyer], une simple liste
+ * d'adresses. Relue par cette version, elle faisait planter la page Réglages.
+ */
+const MEMBERS_KEY = (householdId: string | undefined) => ["members-v2", householdId];
+
 export function useMembers(householdId: string | undefined) {
   return useQuery({
-    queryKey: ["members", householdId],
+    queryKey: MEMBERS_KEY(householdId),
     enabled: !!householdId,
     staleTime: 5 * 60_000,
     queryFn: async () => {
@@ -57,7 +63,7 @@ export function useSetMyName(householdId: string | undefined) {
       const { error } = await supabase.rpc("set_my_name", { name });
       if (error) throw error;
     },
-    onSettled: () => qc.invalidateQueries({ queryKey: ["members", householdId] }),
+    onSettled: () => qc.invalidateQueries({ queryKey: MEMBERS_KEY(householdId) }),
   });
 }
 
